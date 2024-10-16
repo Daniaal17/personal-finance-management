@@ -1,10 +1,12 @@
 
 
 # dependencies
-/frontent/node_modules
+*/node_modules
+
+
+# build
 /frontent/dist
 /frontent/build
-/node_modules
 /.pnp
 .pnp.js
 
