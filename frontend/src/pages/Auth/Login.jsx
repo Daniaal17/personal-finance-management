@@ -2,17 +2,83 @@ import React, { useState } from "react";
 import { ArrowRight, Eye, EyeOff, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 
+// Default values for the login form
+const defaultBody = {
+  email: "",
+  password: "",
+};
+
 const Login = () => {
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [data, setData] = useState(defaultBody); // Form data state
+  const [errors, setErrors] = useState({}); // Errors state
+  const [submitted, setSubmitted] = useState(false); // Track form submission
+  const [showLoginPassword, setShowLoginPassword] = useState(false); // Toggle password visibility
 
   const toggleLoginPasswordVisibility = () =>
     setShowLoginPassword(!showLoginPassword);
 
+  // Validation logic for each field
+  const validateField = (name, value) => {
+    const fieldErrors = {};
+    if (name === "email") {
+      if (!value.trim()) {
+        fieldErrors.email = "Email is required.";
+      } else if (!/\S+@\S+\.\S+/.test(value)) {
+        fieldErrors.email = "Email format is invalid.";
+      }
+    }
+    if (name === "password") {
+      if (!value.trim()) {
+        fieldErrors.password = "Password is required.";
+      } else if (value.length < 6) {
+        fieldErrors.password = "Password must be at least 6 characters.";
+      }
+    }
+    return fieldErrors;
+  };
+
+  // Handle field blur (validate on blur)
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const fieldErrors = validateField(name, value);
+    setErrors({ ...errors, ...fieldErrors });
+  };
+
+  // Validate the entire form on submit
+  const validateForm = () => {
+    const validationErrors = {};
+    Object.keys(data).forEach((field) => {
+      const fieldErrors = validateField(field, data[field]);
+      Object.assign(validationErrors, fieldErrors);
+    });
+    return validationErrors;
+  };
+
+  // Form submission handler
   const handleLoginSubmit = (e) => {
     e.preventDefault();
-    console.log("Login form submitted:", { loginEmail, loginPassword });
+    setSubmitted(true); // Mark form as submitted
+    const validationErrors = validateForm();
+    setErrors(validationErrors);
+
+    // If there are no validation errors, proceed with form submission
+    if (Object.keys(validationErrors).length === 0) {
+      console.log("Login form submitted:", data);
+    }
+  };
+
+  // Generic input handler
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setData({ ...data, [name]: value });
+
+    // Clear errors for corrected fields after they are valid
+    if (errors[name]) {
+      const fieldErrors = validateField(name, value);
+      if (!Object.keys(fieldErrors).length) {
+        setErrors({ ...errors, [name]: "" });
+      }
+    }
   };
 
   return (
@@ -29,20 +95,26 @@ const Login = () => {
         </h2>
 
         <form onSubmit={handleLoginSubmit} className="space-y-5">
+          {/* Email Field */}
           <div className="transform hover:translate-x-1 transition-transform duration-200">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email Address
             </label>
             <input
               type="email"
+              name="email"
               className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
               placeholder="you@example.com"
-              required
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
+              value={data.email}
+              onChange={handleInputChange}
+              onBlur={handleBlur}
             />
+            {(submitted || errors.email) && errors.email && (
+              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+            )}
           </div>
 
+          {/* Password Field */}
           <div className="transform hover:translate-x-1 transition-transform duration-200">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Password
@@ -50,11 +122,12 @@ const Login = () => {
             <div className="relative">
               <input
                 type={showLoginPassword ? "text" : "password"}
+                name="password"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 placeholder="••••••••"
-                required
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
+                value={data.password}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
               />
               <button
                 type="button"
@@ -64,6 +137,9 @@ const Login = () => {
                 {showLoginPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+            {(submitted || errors.password) && errors.password && (
+              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+            )}
           </div>
 
           <button
