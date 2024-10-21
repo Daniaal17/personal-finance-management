@@ -1,21 +1,19 @@
 import React, { useState } from "react";
 import { ArrowRight, Eye, EyeOff, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
+import currencies from "../../constants/currencyList";
 
-const currencies = [
-  { symbol: "$", name: "USD", label: "US Dollar" },
-  { symbol: "€", name: "EUR", label: "Euro" },
-  { symbol: "£", name: "GBP", label: "British Pound" },
-  { symbol: "¥", name: "JPY", label: "Japanese Yen" },
-  { symbol: "₹", name: "INR", label: "Indian Rupee" },
-];
+const defaultBody = {
+  email: "",
+  name: "",
+  currency: "",
+  password: "",
+  confirmPassword: "",
+};
 
 const Signup = () => {
-  const [name, setName] = useState("");
-  const [signupEmail, setSignupEmail] = useState("");
-  const [currency, setCurrency] = useState("");
-  const [signupPassword, setSignupPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [data, setData] = useState(defaultBody);
+  const [errors, setErrors] = useState({});
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -24,19 +22,75 @@ const Signup = () => {
   const toggleConfirmPasswordVisibility = () =>
     setShowConfirmPassword(!showConfirmPassword);
 
+  // Validation logic
+  const validateField = (name, value) => {
+    const fieldErrors = {};
+    if (name === "name" && !value.trim()) {
+      fieldErrors.name = "Full name is required.";
+    }
+    if (name === "email") {
+      if (!value.trim()) {
+        fieldErrors.email = "Email is required.";
+      } else if (!/\S+@\S+\.\S+/.test(value)) {
+        fieldErrors.email = "Email format is invalid.";
+      }
+    }
+    if (name === "currency" && !value.trim()) {
+      fieldErrors.currency = "Please select a preferred currency.";
+    }
+    if (name === "password") {
+      if (!value.trim()) {
+        fieldErrors.password = "Password is required.";
+      } else if (value.length < 6) {
+        fieldErrors.password = "Password must be at least 6 characters.";
+      }
+    }
+    if (name === "confirmPassword") {
+      if (!value.trim()) {
+        fieldErrors.confirmPassword = "Confirm password is required.";
+      } else if (value !== data.password) {
+        fieldErrors.confirmPassword = "Passwords do not match.";
+      }
+    }
+    return fieldErrors;
+  };
+
+  // Handle field blur (trigger validation on blur)
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const fieldErrors = validateField(name, value);
+    setErrors({ ...errors, ...fieldErrors });
+  };
+
+  // Form submission handler
   const handleSignupSubmit = (e) => {
     e.preventDefault();
-    console.log("Signup form submitted:", {
-      name,
-      signupEmail,
-      currency,
-      signupPassword,
-      confirmPassword,
+    const validationErrors = {};
+    Object.keys(data).forEach((field) => {
+      const fieldErrors = validateField(field, data[field]);
+      Object.assign(validationErrors, fieldErrors);
     });
+    setErrors(validationErrors);
+
+    if (Object.keys(validationErrors).length === 0) {
+      // If no errors, submit form
+      console.log("Signup form submitted:", data);
+    }
+  };
+
+  // Generic input handler
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setData({ ...data, [name]: value });
+
+    // Clear errors when input is corrected
+    if (errors[name]) {
+      setErrors({ ...errors, [name]: "" });
+    }
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-purple-100 via-blue-100 to-teal-100 flex items-center justify-center p-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-purple-100 via-blue-100 to-teal-100 flex items-center justify-center p-6">
       <div className="bg-white/80 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-full max-w-6xl h-auto flex overflow-hidden">
         {/* Left Section */}
         <div className="w-1/3 bg-gradient-to-b from-blue-600 to-purple-600 p-8 flex flex-col justify-center items-center text-white">
@@ -69,12 +123,16 @@ const Signup = () => {
                 </label>
                 <input
                   type="text"
+                  name="name"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                   placeholder="John Doe"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={data.name}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
                 />
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+                )}
               </div>
 
               <div className="transform hover:translate-x-1 transition-transform duration-200 w-1/2">
@@ -83,12 +141,16 @@ const Signup = () => {
                 </label>
                 <input
                   type="email"
+                  name="email"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                   placeholder="you@example.com"
-                  required
-                  value={signupEmail}
-                  onChange={(e) => setSignupEmail(e.target.value)}
+                  value={data.email}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+                )}
               </div>
             </div>
 
@@ -97,10 +159,11 @@ const Signup = () => {
                 Preferred Currency
               </label>
               <select
+                name="currency"
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                required
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
+                value={data.currency}
+                onChange={handleInputChange}
+                onBlur={handleBlur}
               >
                 <option value="">Select currency</option>
                 {currencies.map((currency) => (
@@ -109,6 +172,9 @@ const Signup = () => {
                   </option>
                 ))}
               </select>
+              {errors.currency && (
+                <p className="text-red-500 text-xs mt-1">{errors.currency}</p>
+              )}
             </div>
 
             <div className="transform hover:translate-x-1 transition-transform duration-200">
@@ -118,11 +184,12 @@ const Signup = () => {
               <div className="relative">
                 <input
                   type={showSignupPassword ? "text" : "password"}
+                  name="password"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                   placeholder="••••••••"
-                  required
-                  value={signupPassword}
-                  onChange={(e) => setSignupPassword(e.target.value)}
+                  value={data.password}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
                 />
                 <button
                   type="button"
@@ -136,6 +203,9 @@ const Signup = () => {
                   )}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+              )}
             </div>
 
             <div className="transform hover:translate-x-1 transition-transform duration-200">
@@ -145,11 +215,12 @@ const Signup = () => {
               <div className="relative">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
+                  name="confirmPassword"
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                   placeholder="••••••••"
-                  required
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  value={data.confirmPassword}
+                  onChange={handleInputChange}
+                  onBlur={handleBlur}
                 />
                 <button
                   type="button"
@@ -163,6 +234,11 @@ const Signup = () => {
                   )}
                 </button>
               </div>
+              {errors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.confirmPassword}
+                </p>
+              )}
             </div>
 
             <button
