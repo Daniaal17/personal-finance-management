@@ -91,12 +91,11 @@ router.post("/signup", async (request, response) => {
     let user = new User({
       fullName: name,
       email: email.trim().toLowerCase(),
-      // role: "super-admin",
-      // company: company._id,
+
       currency: currency,
     });
     user.setPassword(password);
-    user.genMailTokenForVerification();
+    user.setOTP();
 
     await user.save();
     sendEmail(user, "Verify Your Email Address", { verifyEmail: true });

@@ -12,8 +12,8 @@ function App() {
     <Fragment>
       <BrowserRouter>
         <Routes>
-          <Route path="/">
-            <Route path="" element={<Login />} />
+          <Route path="/auth">
+            <Route path="login" element={<Login />} />
             <Route path="signup" element={<Signup />} />
           </Route>
 

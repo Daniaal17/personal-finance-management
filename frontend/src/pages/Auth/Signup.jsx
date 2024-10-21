@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ArrowRight, Eye, EyeOff, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
 import currencies from "../../constants/currencyList";
+import axios from "axios";
 
 const defaultBody = {
   email: "",
@@ -74,15 +75,23 @@ const Signup = () => {
   };
 
   // Form submission handler
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true); // Mark form as submitted
     const validationErrors = validateForm();
     setErrors(validationErrors);
 
-    // If no errors, submit form
-    if (Object.keys(validationErrors).length === 0) {
-      console.log("Signup form submitted:", data);
+    // If there are errors, return early and don't proceed with the request
+    if (Object.keys(validationErrors).length !== 0) return;
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/auth/signup",
+        data
+      );
+      console.log("Signup successful:", response.data);
+    } catch (error) {
+      console.error("Error during signup:", error);
     }
   };
 
@@ -113,7 +122,7 @@ const Signup = () => {
             You are just moments away from accessing your financial dashboard!
           </p>
           <Link
-            to="/"
+            to="/auth/login"
             className="text-white/90 hover:text-white text-sm font-medium transition-all duration-200 border border-white/20 rounded-xl px-6 py-3 hover:bg-white/10"
           >
             Already have an account? Sign in

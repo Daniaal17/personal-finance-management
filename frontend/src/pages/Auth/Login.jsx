@@ -153,7 +153,7 @@ const Login = () => {
 
         <div className="mt-8 text-center">
           <Link
-            to="/signup"
+            to="/auth/signup"
             className="text-gray-600 hover:text-purple-600 text-sm font-medium transition-colors duration-200"
           >
             Don't have an account? Sign up

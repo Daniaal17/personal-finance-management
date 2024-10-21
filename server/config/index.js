@@ -1,13 +1,7 @@
 const devURLs = {
   BACKEND_URL: "http://localhost:8000",
-  FRONTEND_URL: "http://localhost:3000",
+  FRONTEND_URL: "http://localhost:5173",
   publicPics: "http://localhost:8000/uploads/publicPics",
-};
-
-const prodURLs = {
-  BACKEND_URL: "https://spectrum.com",
-  FRONTEND_URL: "https://spectrum.com",
-  publicPics: "https://spectrum.com/uploads/publicPics",
 };
 
 const config = {
@@ -22,7 +16,7 @@ const config = {
     SMTP_USERNAME: process.env.SMTP_USERNAME,
     SMTP_PASSWORD: process.env.SMTP_PASSWORD,
   },
-  allowedOrigins: ["http://localhost:3000"],
+  allowedOrigins: ["http://localhost:5173"],
 };
 
 module.exports = config;
