@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { ArrowRight, DollarSign, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, DollarSign } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const currencies = [
   { symbol: "$", name: "USD", label: "US Dollar" },
@@ -9,69 +10,88 @@ const currencies = [
   { symbol: "₹", name: "INR", label: "Indian Rupee" },
 ];
 
-const AuthPages = () => {
-  const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
+const Signup = () => {
+  const [name, setName] = useState("");
+  const [signupEmail, setSignupEmail] = useState("");
+  const [currency, setCurrency] = useState("");
+  const [signupPassword, setSignupPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    currency: "",
-    password: "",
-    confirmPassword: "",
-  });
 
-  const toggleForm = () => setIsLogin(!isLogin);
-  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const toggleSignupPasswordVisibility = () =>
+    setShowSignupPassword(!showSignupPassword);
   const toggleConfirmPasswordVisibility = () =>
     setShowConfirmPassword(!showConfirmPassword);
 
-  const handleSubmit = (e) => {
+  const handleSignupSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    console.log("Signup form submitted:", {
+      name,
+      signupEmail,
+      currency,
+      signupPassword,
+      confirmPassword,
+    });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-100 to-teal-100 flex items-center justify-center p-4 animate-gradient-x">
-      <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-8 w-full max-w-md transform hover:scale-[1.01] transition-all duration-300">
-        <div className="flex items-center justify-center mb-8">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 rounded-2xl shadow-lg transform hover:rotate-6 transition-transform duration-300">
-            <DollarSign className="h-8 w-8 text-white animate-pulse" />
+    <div className="min-h-screen w-full bg-gradient-to-br from-purple-100 via-blue-100 to-teal-100 flex items-center justify-center p-4">
+      <div className="bg-white/80 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] w-full max-w-6xl h-auto flex overflow-hidden">
+        {/* Left Section */}
+        <div className="w-1/3 bg-gradient-to-b from-blue-600 to-purple-600 p-8 flex flex-col justify-center items-center text-white">
+          <div className="mb-8">
+            <DollarSign className="h-16 w-16 text-white animate-pulse" />
           </div>
+          <h1 className="text-3xl font-bold mb-4">Welcome</h1>
+          <p className="text-center text-white/80 mb-8">
+            You are just moments away from accessing your financial dashboard!
+          </p>
+          <Link
+            to="/"
+            className="text-white/90 hover:text-white text-sm font-medium transition-all duration-200 border border-white/20 rounded-xl px-6 py-3 hover:bg-white/10"
+          >
+            Already have an account? Sign in
+          </Link>
         </div>
 
-        <h2 className="text-3xl font-bold text-center mb-8 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
-          {isLogin ? "Welcome Back!" : "Create Account"}
-        </h2>
+        {/* Right Section */}
+        <div className="w-2/3 p-8">
+          <h2 className="text-3xl font-bold mb-8 bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+            Create Account
+          </h2>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {!isLogin && (
-            <div className="transform hover:translate-x-1 transition-transform duration-200">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Full Name
-              </label>
-              <input
-                type="text"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                placeholder="John Doe"
-                required
-              />
+          <form onSubmit={handleSignupSubmit} className="space-y-5">
+            <div className="flex space-x-4">
+              <div className="transform hover:translate-x-1 transition-transform duration-200 w-1/2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  placeholder="John Doe"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+
+              <div className="transform hover:translate-x-1 transition-transform duration-200 w-1/2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  placeholder="you@example.com"
+                  required
+                  value={signupEmail}
+                  onChange={(e) => setSignupEmail(e.target.value)}
+                />
+              </div>
             </div>
-          )}
 
-          <div className="transform hover:translate-x-1 transition-transform duration-200">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-              placeholder="you@example.com"
-              required
-            />
-          </div>
-
-          {!isLogin && (
             <div className="transform hover:translate-x-1 transition-transform duration-200">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Preferred Currency
@@ -79,6 +99,8 @@ const AuthPages = () => {
               <select
                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                 required
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
               >
                 <option value="">Select currency</option>
                 {currencies.map((currency) => (
@@ -88,30 +110,34 @@ const AuthPages = () => {
                 ))}
               </select>
             </div>
-          )}
 
-          <div className="transform hover:translate-x-1 transition-transform duration-200">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                placeholder="••••••••"
-                required
-              />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-purple-600 transition-colors duration-200"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
+            <div className="transform hover:translate-x-1 transition-transform duration-200">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showSignupPassword ? "text" : "password"}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+                  placeholder="••••••••"
+                  required
+                  value={signupPassword}
+                  onChange={(e) => setSignupPassword(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={toggleSignupPasswordVisibility}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-purple-600 transition-colors duration-200"
+                >
+                  {showSignupPassword ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+              </div>
             </div>
-          </div>
 
-          {!isLogin && (
             <div className="transform hover:translate-x-1 transition-transform duration-200">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Confirm Password
@@ -122,6 +148,8 @@ const AuthPages = () => {
                   className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                   placeholder="••••••••"
                   required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -136,32 +164,19 @@ const AuthPages = () => {
                 </button>
               </div>
             </div>
-          )}
 
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl hover:opacity-90 transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
-          >
-            {isLogin ? "Sign In" : "Create Account"}
-            <ArrowRight className="h-4 w-4" />
-          </button>
-        </form>
-
-        <div className="mt-8 text-center">
-          <button
-            onClick={toggleForm}
-            className="text-gray-600 hover:text-purple-600 text-sm font-medium transition-colors duration-200"
-          >
-            {isLogin
-              ? "Don't have an account? Sign up"
-              : "Already have an account? Sign in"}
-          </button>
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl hover:opacity-90 transform hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
+            >
+              Create Account
+              <ArrowRight className="h-4 w-4" />
+            </button>
+          </form>
         </div>
       </div>
     </div>
   );
 };
 
-export default AuthPages;
-
-// Add this to your global CSS file
+export default Signup;
