@@ -14,6 +14,7 @@ const defaultBody = {
 const Signup = () => {
   const [data, setData] = useState(defaultBody);
   const [errors, setErrors] = useState({});
+  const [submitted, setSubmitted] = useState(false); // Track if form was submitted
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -22,7 +23,7 @@ const Signup = () => {
   const toggleConfirmPasswordVisibility = () =>
     setShowConfirmPassword(!showConfirmPassword);
 
-  // Validation logic
+  // Validation logic for each field
   const validateField = (name, value) => {
     const fieldErrors = {};
     if (name === "name" && !value.trim()) {
@@ -55,25 +56,32 @@ const Signup = () => {
     return fieldErrors;
   };
 
-  // Handle field blur (trigger validation on blur)
+  // Handle field blur (validate on blur)
   const handleBlur = (e) => {
     const { name, value } = e.target;
     const fieldErrors = validateField(name, value);
     setErrors({ ...errors, ...fieldErrors });
   };
 
-  // Form submission handler
-  const handleSignupSubmit = (e) => {
-    e.preventDefault();
+  // Validate the entire form on submit
+  const validateForm = () => {
     const validationErrors = {};
     Object.keys(data).forEach((field) => {
       const fieldErrors = validateField(field, data[field]);
       Object.assign(validationErrors, fieldErrors);
     });
+    return validationErrors;
+  };
+
+  // Form submission handler
+  const handleSignupSubmit = (e) => {
+    e.preventDefault();
+    setSubmitted(true); // Mark form as submitted
+    const validationErrors = validateForm();
     setErrors(validationErrors);
 
+    // If no errors, submit form
     if (Object.keys(validationErrors).length === 0) {
-      // If no errors, submit form
       console.log("Signup form submitted:", data);
     }
   };
@@ -83,9 +91,12 @@ const Signup = () => {
     const { name, value } = e.target;
     setData({ ...data, [name]: value });
 
-    // Clear errors when input is corrected
+    // Clear errors for corrected fields after they are valid
     if (errors[name]) {
-      setErrors({ ...errors, [name]: "" });
+      const fieldErrors = validateField(name, value);
+      if (!Object.keys(fieldErrors).length) {
+        setErrors({ ...errors, [name]: "" });
+      }
     }
   };
 
@@ -130,7 +141,7 @@ const Signup = () => {
                   onChange={handleInputChange}
                   onBlur={handleBlur}
                 />
-                {errors.name && (
+                {submitted && errors.name && (
                   <p className="text-red-500 text-xs mt-1">{errors.name}</p>
                 )}
               </div>
@@ -148,7 +159,7 @@ const Signup = () => {
                   onChange={handleInputChange}
                   onBlur={handleBlur}
                 />
-                {errors.email && (
+                {submitted && errors.email && (
                   <p className="text-red-500 text-xs mt-1">{errors.email}</p>
                 )}
               </div>
@@ -172,7 +183,7 @@ const Signup = () => {
                   </option>
                 ))}
               </select>
-              {errors.currency && (
+              {submitted && errors.currency && (
                 <p className="text-red-500 text-xs mt-1">{errors.currency}</p>
               )}
             </div>
@@ -203,7 +214,7 @@ const Signup = () => {
                   )}
                 </button>
               </div>
-              {errors.password && (
+              {submitted && errors.password && (
                 <p className="text-red-500 text-xs mt-1">{errors.password}</p>
               )}
             </div>
@@ -234,7 +245,7 @@ const Signup = () => {
                   )}
                 </button>
               </div>
-              {errors.confirmPassword && (
+              {submitted && errors.confirmPassword && (
                 <p className="text-red-500 text-xs mt-1">
                   {errors.confirmPassword}
                 </p>
