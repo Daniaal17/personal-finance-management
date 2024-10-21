@@ -12,7 +12,6 @@ const router = express.Router();
 const imgUpload = imageUploader.fields([{ name: "profileImg", maxCount: 1 }]);
 
 router.get("/context", (request, response) => {
-  // logger.info("User context retrieved successfully!");
   return ResponseHandler.ok(
     response,
     "User context retrieved successfully...!"

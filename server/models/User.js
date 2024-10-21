@@ -6,6 +6,7 @@ const uniqueValidator = require("mongoose-unique-validator");
 const config = require("../config");
 
 const { customAlphabet } = require("nanoid");
+const { type } = require("os");
 const alphabet =
   "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 const nanoid = customAlphabet(alphabet, 10);
@@ -24,18 +25,7 @@ const UserSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    phone: {
-      type: String,
-      unique: true,
-      default: null,
-    },
-    profileImage: {
-      type: String,
-      default: null,
-    },
 
-    // Auth Controls
-    role: { type: String, enum: ["admin", "patient", "provider"] },
     authType: {
       type: String,
       enum: ["local", "google", "facebook"],
@@ -50,7 +40,7 @@ const UserSchema = new mongoose.Schema(
       enum: ["active", "inactive", "pending"],
       default: "pending",
     },
-
+    currency: { type: String, default: "GBP" },
     hash: { type: String, default: null },
     salt: { type: String, default: null },
   },
@@ -59,13 +49,6 @@ const UserSchema = new mongoose.Schema(
 
 UserSchema.plugin(uniqueValidator, { message: "Taken" });
 UserSchema.plugin(mongoosePaginate);
-
-UserSchema.pre("save", function (next) {
-  if (!this.centrusId) {
-    this.centrusId = nanoid();
-  }
-  next();
-});
 
 UserSchema.methods.validPassword = function (password) {
   let hash = crypto
@@ -81,32 +64,9 @@ UserSchema.methods.setPassword = function (password) {
     .toString("hex");
 };
 
-UserSchema.methods.generatePasswordResetToken = function () {
-  const resetToken = crypto.randomBytes(20).toString("hex");
-  const tokenExpiry = Date.now() + 1800000; // 30 minutes
-  this.resetPasswordToken = {
-    value: resetToken,
-    expires: tokenExpiry,
-  };
-};
-
-UserSchema.methods.genMailTokenForVerification = function () {
-  const mailToken = crypto.randomBytes(20).toString("hex");
-  const tokenExpiry = Date.now() + 1800000; // 30 minutes
-  this.mailToken = {
-    value: mailToken,
-    expires: tokenExpiry,
-  };
-};
-
-UserSchema.methods.genMailTokenForJoin = function () {
-  const mailToken = crypto.randomBytes(20).toString("hex");
-  // create tokenExpiry w unlimited expiry
-  const tokenExpiry = null;
-  this.mailToken = {
-    value: mailToken,
-    expires: tokenExpiry,
-  };
+UserSchema.methods.setOTP = function () {
+  this.otp = Math.floor(100000 + Math.random() * 9000);
+  this.otpExpires = Date.now() + 3600000; // 1 hour
 };
 
 UserSchema.methods.generateJWT = function () {
@@ -118,8 +78,6 @@ UserSchema.methods.generateJWT = function () {
     {
       id: this._id,
       email: this.email,
-      company: this.company,
-      role: this.role,
       exp: parseInt(exp.getTime() / 1000),
     },
     config.secret
@@ -130,11 +88,9 @@ UserSchema.methods.toAuthJSON = function () {
   return {
     id: this._id,
     fullName: this.fullName,
-    role: this.role,
     otp: this.otp,
     authType: this.authType,
     otp: this.otp,
-    phone: this.phone,
     status: this.status,
     token: this.generateJWT(),
   };
@@ -146,7 +102,7 @@ UserSchema.methods.toJSON = function () {
     fullName: this.fullName,
     email: this.email,
     status: this.status,
-    phone: this.phone,
+    currency: this.currency,
     role: this.role,
   };
 };
