@@ -15,7 +15,7 @@ const {
 const router = express.Router();
 
 router.use(passport.initialize());
-router.use(passport.session());
+// router.use(passport.session());
 
 router.get("/context", auth.required, auth.user, async (request, response) => {
   try {
@@ -98,10 +98,10 @@ router.post("/signup", async (request, response) => {
     user.setOTP();
 
     await user.save();
-    sendEmail(user, "Verify Your Email Address", { verifyEmail: true });
+    sendEmail(user, "Verify OTP", { verifyAccount: true });
     return ResponseHandler.ok(
       response,
-      "User signed up successfully! Please verify your email address to login"
+      "User signed up successfully! Please verify your OTP to login"
     );
   } catch (err) {
     console.log(err, "err");

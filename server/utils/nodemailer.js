@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 const {
-  emailVerifyTemplate,
+  otpVerifyTemplate,
   passwordResetTemplate,
   contactTemplate,
   subscribeTemplate,
@@ -22,8 +22,8 @@ const setTransporter = () =>
   });
 
 const selectTemplate = (user, body, template) => {
-  if (body.verifyEmail) {
-    template = emailVerifyTemplate(user);
+  if (body.verifyAccount) {
+    template = otpVerifyTemplate(user);
   } else if (body.resetPassword) {
     template = passwordResetTemplate(user);
   } else if (body.contact) {
@@ -44,24 +44,12 @@ const setMessage = (userEmail, subject, template) => ({
   html: template,
 });
 
-const setFormMessage = (supportEmail, subject, body) => ({
-  to: supportEmail,
-  from: SENDER_ADDRESS,
-  subject,
-  html: body,
-});
-
 const sendEmail = (user, subject, body) => {
   const transporter = setTransporter();
 
   let template = "";
   template = selectTemplate(user, body, template);
-  let msg;
-  if (body.contact) {
-    msg = setFormMessage("muhammadsalman2471006@gmail.com", subject, template);
-  } else {
-    msg = setMessage(user.email, subject, template);
-  }
+  let msg = setMessage(user.email, subject, template);
 
   transporter.sendMail(msg, (err, info) => {
     if (err) console.log("🚀 ~ transporter.sendMail ~ err:", err);

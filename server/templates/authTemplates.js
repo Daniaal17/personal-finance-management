@@ -1,7 +1,7 @@
 const { BACKEND_URL } = require("../config");
 
-exports.emailVerifyTemplate = (user) => {
-	return `<!DOCTYPE html>
+exports.otpVerifyTemplate = (user) => {
+  return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
@@ -54,7 +54,7 @@ exports.emailVerifyTemplate = (user) => {
                       <tbody>
                         <tr>
                           <td style="text-align: center;">
-                            <img src="https://staging.fixtops.org/uploads/publicPics/centrus.png" style="width: 150px; height: 50px; display: block; margin: 0 auto;">
+                            <img src="https://staging.fixtops.org/uploads/publicPics/download.png" style="width: 150px; height: 50px; display: block; margin: 0 auto;">
                           </td>
                         </tr>
                       </tbody>
@@ -78,7 +78,7 @@ exports.emailVerifyTemplate = (user) => {
                                 text-align: center;
                               "
                             >
-                              Verify Your Email Address
+                              
                             </h1>
                             <p
                               style="
@@ -91,9 +91,8 @@ exports.emailVerifyTemplate = (user) => {
                               "
                             >
                               Thank you for initiating the account creation
-                              process with Centrus AI. To confirm your
-                              email address and complete your registration,
-                              please click the button below.
+                              process with Personal Finance Management. To complete your registration,
+                              please verify the otp below.
                             </p>
                             <table
                               width="100%"
@@ -116,7 +115,7 @@ exports.emailVerifyTemplate = (user) => {
                                       "
                                     >
                                       <a
-                                        href="${BACKEND_URL}/app/api/auth/verify-email/${user?.mailToken?.value}"
+                                       
                                         style="
                                           background-color: #041B70;
                                           border-radius: 8px;
@@ -125,7 +124,7 @@ exports.emailVerifyTemplate = (user) => {
                                           color: #fff;
                                         "
                                       >
-                                        Confirm registration
+                                       ${user.otp}
                                       </a>
                                     </p>
                                     <p
@@ -137,7 +136,7 @@ exports.emailVerifyTemplate = (user) => {
                                         text-align: center;
                                       "
                                     >
-                                      (This link is valid for 30 minutes)
+                                      (This OTP is valid for 30 minutes)
                                     </p>
                                   </td>
                                 </tr>
@@ -172,7 +171,7 @@ exports.emailVerifyTemplate = (user) => {
                                 color: #333;
                               "
                             >
-                              Centrus AI will never email you and ask you
+                              Personal Finance Management will never email you and ask you
                               to disclose or verify your password.
                             </p>
                           </td>
@@ -183,17 +182,7 @@ exports.emailVerifyTemplate = (user) => {
                 </tr>
               </tbody>
             </table>
-            <p
-              style="
-                font-size: 12px;
-                line-height: 24px;
-                margin: 24px 0;
-                color: #333;
-                padding: 0 20px;
-              "
-            >
-              © 2024 Centrus AI, Inc. All rights reserved.
-            </p>
+            
           </td>
         </tr>
       </tbody>
@@ -204,7 +193,7 @@ exports.emailVerifyTemplate = (user) => {
 };
 
 exports.passwordResetTemplate = (user) => {
-	return `
+  return `
     <!DOCTYPE html>
     <html lang="en">
 
@@ -309,7 +298,7 @@ exports.passwordResetTemplate = (user) => {
 };
 
 exports.contactTemplate = (user) => {
-	return `
+  return `
   <!DOCTYPE html>
 <html lang="en">
 
@@ -363,7 +352,9 @@ exports.contactTemplate = (user) => {
                                 font-weight: bold;
                                 margin-bottom: 5px;
                               ">
-                                                        ${user.fname} ${user.lname}
+                                                        ${user.fname} ${
+    user.lname
+  }
                                                     </h1>
                                                     <p style="
                                 font-size: 14px;
@@ -374,16 +365,23 @@ exports.contactTemplate = (user) => {
 
                               ">
                                                         ${new Date()
-																													.toLocaleString("en-US", {
-																														month: "short",
-																														day: "numeric",
-																														year: "numeric",
-																														hour: "numeric",
-																														minute: "numeric",
-																														timeZone: "UTC",
-																														timeZoneName: "short",
-																													})
-																													.replace("GMT", "UTC")}
+                                                          .toLocaleString(
+                                                            "en-US",
+                                                            {
+                                                              month: "short",
+                                                              day: "numeric",
+                                                              year: "numeric",
+                                                              hour: "numeric",
+                                                              minute: "numeric",
+                                                              timeZone: "UTC",
+                                                              timeZoneName:
+                                                                "short",
+                                                            }
+                                                          )
+                                                          .replace(
+                                                            "GMT",
+                                                            "UTC"
+                                                          )}
                                                     </p>
                                                     <p style="
                                 color: #333;
@@ -419,7 +417,9 @@ exports.contactTemplate = (user) => {
                               ">
                                                         Company:
                                                         <span style="font-weight: 400;">
-                                                            &nbsp;${user.company}
+                                                            &nbsp;${
+                                                              user.company
+                                                            }
                                                         </span>
                                                     </p>
                                                     <p style="
@@ -431,7 +431,9 @@ exports.contactTemplate = (user) => {
                               ">
                                                         Industry:
                                                         <span style="font-weight: 400;">
-                                                            &nbsp;${user.industry}
+                                                            &nbsp;${
+                                                              user.industry
+                                                            }
                                                         </span>
                                                     </p>
                                                     <p style="
@@ -476,7 +478,7 @@ exports.contactTemplate = (user) => {
 };
 
 exports.subscribeTemplate = (user) => {
-	return `
+  return `
   <!DOCTYPE html>
 <html lang="en">
 
@@ -593,7 +595,7 @@ exports.subscribeTemplate = (user) => {
 };
 
 exports.appJoinTemplate = (user) => {
-	return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />

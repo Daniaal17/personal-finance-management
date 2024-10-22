@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { ArrowRight, Eye, EyeOff, DollarSign } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import currencies from "../../constants/currencyList";
 import axios from "axios";
 
@@ -18,6 +18,7 @@ const Signup = () => {
   const [submitted, setSubmitted] = useState(false); // Track if form was submitted
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
 
   const toggleSignupPasswordVisibility = () =>
     setShowSignupPassword(!showSignupPassword);
@@ -89,6 +90,9 @@ const Signup = () => {
         "http://localhost:8000/api/auth/signup",
         data
       );
+
+      navigate("/auth/verification", { state: { email: data.email } });
+
       console.log("Signup successful:", response.data);
     } catch (error) {
       console.error("Error during signup:", error);
