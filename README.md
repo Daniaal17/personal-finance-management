@@ -1,4 +1,4 @@
-# spectrum--backend
+# Personal Finance Management system
 
 ## Getting Started
 
