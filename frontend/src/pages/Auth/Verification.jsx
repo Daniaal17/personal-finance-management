@@ -1,16 +1,20 @@
 import React, { useState } from "react";
 import { ArrowRight, DollarSign } from "lucide-react";
 import OtpInput from "react-otp-input";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { failureToaster, successToaster } from "../../utils/swal";
+import axios from "axios";
 
 const OTPVerification = () => {
   const location = useLocation();
-  const email = location.state?.email;
+  const verificationType = location.state?.type;
+  const navigate = useNavigate();
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
   const handleVerifyOTP = async (e) => {
+    const email = localStorage.getItem("email");
     e.preventDefault();
     if (otp.length !== 6) {
       setError("Please enter a valid 6-digit OTP");
@@ -21,12 +25,15 @@ const OTPVerification = () => {
     setError("");
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("OTP Verified:", otp);
-      // Handle successful verification here
+      await axios.post(`http://localhost:8000/api/auth/otp/verify/${email}`, {
+        otp,
+      });
+      successToaster("User registered successfully");
+      if (verificationType == "reset") navigate("/auth/reset-password");
+      else navigate("/auth/login");
     } catch (error) {
-      setError("Failed to verify OTP. Please try again.");
+      console.log("ERROR", error);
+      failureToaster(error.response.data.message);
     } finally {
       setIsVerifying(false);
     }
@@ -34,12 +41,13 @@ const OTPVerification = () => {
 
   const handleResendOTP = async () => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      console.log("OTP Resent");
-      // Handle successful resend here
+      await axios.post(
+        `http://localhost:8000/api/auth/otp/resend/${`mhsnmubeen@gmail.com`}`
+      );
+      successToaster("Otp sent successfully");
     } catch (error) {
-      setError("Failed to resend OTP. Please try again.");
+      console.log("ERROR", error);
+      failureToaster(error.response.data.message);
     }
   };
 
@@ -65,7 +73,7 @@ const OTPVerification = () => {
           </h2>
 
           <form onSubmit={handleVerifyOTP} className="space-y-8">
-            <div className="transform hover:translate-x-1 transition-transform duration-200">
+            <div className="">
               <div className="flex flex-col items-center space-y-6">
                 <OtpInput
                   value={otp}

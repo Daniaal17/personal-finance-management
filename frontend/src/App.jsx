@@ -5,6 +5,8 @@ import "./App.css";
 import Signup from "./pages/Auth/Signup";
 import Login from "./pages/Auth/Login";
 import OTPVerification from "./pages/Auth/Verification";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import { ResetPassword } from "./pages/Auth/ResetPassword";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -17,6 +19,8 @@ function App() {
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<Signup />} />
             <Route path="verification" element={<OTPVerification />} />
+            <Route path="forgot-password" element={<ForgotPassword />} />
+            <Route path="reset-password" element={<ResetPassword />} />
           </Route>
 
           {/* <Route path="/products" element={<AdminLayout />}>

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { ArrowRight, Eye, EyeOff, DollarSign } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { failureToaster, successToaster } from "../../utils/swal";
 
 // Default values for the login form
 const defaultBody = {
@@ -9,6 +11,7 @@ const defaultBody = {
 };
 
 const Login = () => {
+  const navigate = useNavigate();
   const [data, setData] = useState(defaultBody); // Form data state
   const [errors, setErrors] = useState({}); // Errors state
   const [submitted, setSubmitted] = useState(false); // Track form submission
@@ -54,16 +57,21 @@ const Login = () => {
     return validationErrors;
   };
 
-  // Form submission handler
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setSubmitted(true); // Mark form as submitted
     const validationErrors = validateForm();
     setErrors(validationErrors);
 
-    // If there are no validation errors, proceed with form submission
-    if (Object.keys(validationErrors).length === 0) {
-      console.log("Login form submitted:", data);
+    if (!Object.keys(validationErrors).length === 0) return;
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/auth/login",
+        data
+      );
+      successToaster("Login Successfully");
+    } catch (error) {
+      failureToaster(error.response.data.message);
     }
   };
 
@@ -96,7 +104,7 @@ const Login = () => {
 
         <form onSubmit={handleLoginSubmit} className="space-y-5">
           {/* Email Field */}
-          <div className="transform hover:translate-x-1 transition-transform duration-200">
+          <div className="">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email Address
             </label>
@@ -115,7 +123,7 @@ const Login = () => {
           </div>
 
           {/* Password Field */}
-          <div className="transform hover:translate-x-1 transition-transform duration-200">
+          <div className="">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
@@ -150,6 +158,18 @@ const Login = () => {
             <ArrowRight className="h-4 w-4" />
           </button>
         </form>
+
+        <div className="mt-8 text-center">
+          <div className="text-gray-600  text-sm font-medium ">
+            Did'nt remember password?{" "}
+            <Link
+              to="/auth/forgot-password"
+              className="text-gray-600 underline font-xl hover:text-purple-600 transition-colors duration-200"
+            >
+              Reset Password
+            </Link>
+          </div>
+        </div>
 
         <div className="mt-8 text-center">
           <Link

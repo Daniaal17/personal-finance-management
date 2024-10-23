@@ -3,6 +3,7 @@ import { ArrowRight, Eye, EyeOff, DollarSign } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import currencies from "../../constants/currencyList";
 import axios from "axios";
+import { failureToaster, successToaster } from "../../utils/swal";
 
 const defaultBody = {
   email: "",
@@ -91,10 +92,11 @@ const Signup = () => {
         data
       );
 
-      navigate("/auth/verification", { state: { email: data.email } });
+      navigate("/auth/verification", { state: { type: "registration" } });
 
       console.log("Signup successful:", response.data);
     } catch (error) {
+      failureToaster(error.response.data.message);
       console.error("Error during signup:", error);
     }
   };
@@ -141,7 +143,7 @@ const Signup = () => {
 
           <form onSubmit={handleSignupSubmit} className="space-y-5">
             <div className="flex space-x-4">
-              <div className="transform hover:translate-x-1 transition-transform duration-200 w-1/2">
+              <div className=" w-1/2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name
                 </label>
@@ -159,7 +161,7 @@ const Signup = () => {
                 )}
               </div>
 
-              <div className="transform hover:translate-x-1 transition-transform duration-200 w-1/2">
+              <div className=" w-1/2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email Address
                 </label>
@@ -178,7 +180,7 @@ const Signup = () => {
               </div>
             </div>
 
-            <div className="transform hover:translate-x-1 transition-transform duration-200">
+            <div className="">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Preferred Currency
               </label>
@@ -201,7 +203,7 @@ const Signup = () => {
               )}
             </div>
 
-            <div className="transform hover:translate-x-1 transition-transform duration-200">
+            <div className="">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
@@ -232,7 +234,7 @@ const Signup = () => {
               )}
             </div>
 
-            <div className="transform hover:translate-x-1 transition-transform duration-200">
+            <div className="">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Confirm Password
               </label>
