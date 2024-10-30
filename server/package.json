@@ -1,7 +1,7 @@
 {
-	"name": "spectrum",
+	"name": "finance",
 	"version": "1.0.0",
-	"description": "spectrum server",
+	"description": "finance server",
 	"main": "app.js",
 	"scripts": {
 		"start": "node app.js",
@@ -9,9 +9,9 @@
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"keywords": [
-		"spectrum"
+		"finance"
 	],
-	"author": "Metadots",
+	"author": "Daniyal",
 	"license": "MIT",
 	"dependencies": {
 		"body-parser": "^1.20.2",
