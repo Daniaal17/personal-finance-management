@@ -70,6 +70,7 @@ const Login = () => {
         data
       );
       successToaster("Login Successfully");
+      navigate("/dashboard");
     } catch (error) {
       failureToaster(error.response.data.message);
     }
