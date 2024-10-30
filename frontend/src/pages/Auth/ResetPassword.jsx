@@ -1,7 +1,15 @@
+import axios from "axios";
 import { ArrowRight, Eye, EyeOff, KeyRound } from "lucide-react";
 import { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { failureToaster, successToaster } from "../../utils/swal";
 
 export const ResetPassword = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const otp = location.state?.otp;
+  const email = location.state?.email;
+
   const [passwords, setPasswords] = useState({
     newPassword: "",
     confirmPassword: "",
@@ -35,13 +43,23 @@ export const ResetPassword = () => {
     const validationErrors = validatePasswords();
     setErrors(validationErrors);
 
-    if (Object.keys(validationErrors).length === 0) {
-      try {
-        // API call would go here
-        console.log("Password reset successful");
-      } catch (error) {
-        console.error("Error resetting password:", error);
-      }
+    if (!Object.keys(validationErrors).length === 0) return;
+    const payload = {
+      otp: otp,
+      password: passwords.newPassword,
+      email: email,
+    };
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/api/auth/set-new-password",
+        payload
+      );
+      successToaster("Password reset successfully");
+      navigate("/auth/login");
+    } catch (error) {
+      failureToaster(error.response.data.message);
+
+      console.error("Error resetting password:", error);
     }
   };
 

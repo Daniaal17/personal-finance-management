@@ -26,10 +26,11 @@ const ForgotPassword = () => {
     }
     try {
       await axios.post(`http://localhost:8000/api/auth/otp/resend/${email}`);
-      localStorage.setItem("email", email);
       successToaster("Otp sent successfully");
       setIsSuccess(true);
-      navigate("/auth/verification", { state: { type: "reset" } });
+      navigate("/auth/verification", {
+        state: { type: "reset", email: email },
+      });
       setError("");
     } catch (error) {
       console.log("Error", error);

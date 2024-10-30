@@ -57,7 +57,7 @@ router.post("/signup", async (request, response) => {
     user.setOTP();
 
     await user.save();
-    sendEmail(user, "Verify OTP", { verifyAccount: true });
+    // sendEmail(user, "Verify OTP", { verifyAccount: true });
     return ResponseHandler.ok(
       response,
       "User signed up successfully! Please verify your OTP to login"
@@ -89,7 +89,7 @@ router.post("/login", async (request, response) => {
     if (!user.isOtpVerified) {
       user.setOTP();
       await user.save();
-      sendEmail(user, "Verify OTP", { verifyAccount: true });
+      // sendEmail(user, "Verify OTP", { verifyAccount: true });
       return ResponseHandler.badRequest(response, "Please verify otp");
     }
 
@@ -109,10 +109,11 @@ router.post("/login", async (request, response) => {
   }
 });
 
-router.post("/otp/verify/:email", async (request, response) => {
+router.post("/otp/verify/:email/:type", async (request, response) => {
   const { otp } = request.body;
-  const { email } = request.params;
+  const { email, type } = request.params;
 
+  console.log("Hittsssssssss", otp, email);
   try {
     if (!otp) {
       return ResponseHandler.badRequest(
@@ -134,6 +135,10 @@ router.post("/otp/verify/:email", async (request, response) => {
         "OTP is invalid or has expired"
       );
 
+    if (type === "reset") {
+      return ResponseHandler.ok(response, "Otp verified successfully");
+    }
+
     user.isOtpVerified = true;
     user.otpExpires = null;
 
@@ -150,11 +155,14 @@ router.post("/otp/resend/:email", async (request, response) => {
 
   try {
     const user = await User.findOne({ email: email.trim().toLowerCase() });
-    user.otp = null;
+    if (!user) {
+      return ResponseHandler.badRequest(response, "User not found");
+    }
+
     user.setOTP();
 
     await user.save();
-    sendEmail(user, "Verify OTP", { verifyAccount: true });
+    // sendEmail(user, "Verify OTP", { verifyAccount: true });
 
     return ResponseHandler.ok(response, "Otp sent successfully");
   } catch (error) {
@@ -165,7 +173,13 @@ router.post("/otp/resend/:email", async (request, response) => {
 router.post("/set-new-password", async (request, response) => {
   try {
     const { email, otp, password } = request.body;
-    if (!email || !otp || !password || !email?.trim())
+    if (!otp) {
+      return ResponseHandler.badRequest(
+        response,
+        "Otp not found please reset password sagain"
+      );
+    }
+    if (!password || !email?.trim())
       return ResponseHandler.badRequest(
         response,
         "Missing required parameters"
@@ -177,7 +191,7 @@ router.post("/set-new-password", async (request, response) => {
     });
     if (!user) return ResponseHandler.badRequest(response, "User not found!");
 
-    if (user.otp === otp && user.otpExpires > Date.now()) {
+    if (user.otp == otp && user.otpExpires > Date.now()) {
       user.setPassword(password);
       user.otp = null;
       user.otpExpires = null;

@@ -92,7 +92,9 @@ const Signup = () => {
         data
       );
 
-      navigate("/auth/verification", { state: { type: "registration" } });
+      navigate("/auth/verification", {
+        state: { type: "registration", email: data.email },
+      });
 
       console.log("Signup successful:", response.data);
     } catch (error) {

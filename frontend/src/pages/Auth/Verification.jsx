@@ -8,13 +8,14 @@ import axios from "axios";
 const OTPVerification = () => {
   const location = useLocation();
   const verificationType = location.state?.type;
+  const email = location.state?.email;
+
   const navigate = useNavigate();
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
 
   const handleVerifyOTP = async (e) => {
-    const email = localStorage.getItem("email");
     e.preventDefault();
     if (otp.length !== 6) {
       setError("Please enter a valid 6-digit OTP");
@@ -25,12 +26,20 @@ const OTPVerification = () => {
     setError("");
 
     try {
-      await axios.post(`http://localhost:8000/api/auth/otp/verify/${email}`, {
-        otp,
-      });
-      successToaster("User registered successfully");
-      if (verificationType == "reset") navigate("/auth/reset-password");
-      else navigate("/auth/login");
+      await axios.post(
+        `http://localhost:8000/api/auth/otp/verify/${email}/${verificationType}`,
+        {
+          otp,
+        }
+      );
+
+      if (verificationType == "reset") {
+        successToaster("Otp verified successfully");
+        navigate("/auth/reset-password", { state: { email, otp: otp } });
+      } else {
+        successToaster("User registered successfully");
+        navigate("/auth/login");
+      }
     } catch (error) {
       console.log("ERROR", error);
       failureToaster(error.response.data.message);
