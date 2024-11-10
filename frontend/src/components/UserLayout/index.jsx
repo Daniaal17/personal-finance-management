@@ -14,7 +14,7 @@ const UserLayout = () => {
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
         />
-        <main className="p-6 overflow-auto h-[calc(100vh-4rem)]">
+        <main className=" ">
           <Outlet />
         </main>
       </div>

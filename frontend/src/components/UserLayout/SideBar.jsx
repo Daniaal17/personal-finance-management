@@ -14,8 +14,8 @@ import {
 const Sidebar = ({ isSidebarOpen }) => {
   const navItems = [
     { icon: <Home />, label: "Dashboard", path: "/dashboard" },
+    { icon: <TrendingUp />, label: "budget", path: "/budget" },
     { icon: <Wallet />, label: "Transactions", path: "/transactions" },
-    { icon: <TrendingUp />, label: "Analytics", path: "/analytics" },
     { icon: <PieChart />, label: "Budgets", path: "/budgets" },
     { icon: <Calendar />, label: "Calendar", path: "/calendar" },
   ];
