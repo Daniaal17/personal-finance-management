@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Plus, X, Edit, LucideDelete } from "lucide-react";
 import axios from "axios";
 import { failureToaster, successToaster } from "../../../utils/swal";
@@ -13,33 +13,37 @@ const EMOJI_CATEGORIES = {
 };
 
 const Budget = () => {
-  // ... (previous state declarations remain the same)
   const [selectedPeriod, setSelectedPeriod] = useState("This Month");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedEmoji, setSelectedEmoji] = useState("💰");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [editingBudget, setEditingBudget] = useState(null);
   const [budgets, setBudgets] = useState([]);
-  const [formData, setFormData] = useState({
-    name: "",
-    limit: "",
-  });
+  const [formData, setFormData] = useState({ name: "", limit: "" });
   const [error, setError] = useState("");
 
-  // ... (all handler functions remain the same)
+  useEffect(() => {
+    const fetchBudgets = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:8000/api/budget/all-budgets"
+        );
+        setBudgets(response.data);
+      } catch (error) {
+        console.error("Error fetching budgets:", error);
+      }
+    };
+
+    fetchBudgets();
+  }, []);
+
   const handleOpenModal = (budget = null) => {
     if (budget) {
-      setFormData({
-        name: budget.name,
-        limit: budget.limit,
-      });
+      setFormData({ name: budget.name, limit: budget.limit });
       setSelectedEmoji(budget.emoji);
       setEditingBudget(budget);
     } else {
-      setFormData({
-        name: "",
-        limit: "",
-      });
+      setFormData({ name: "", limit: "" });
       setSelectedEmoji("💰");
       setEditingBudget(null);
     }
@@ -69,33 +73,37 @@ const Budget = () => {
       return;
     }
 
-    if (editingBudget) {
-      setBudgets(
-        budgets.map((budget) =>
-          budget.id === editingBudget.id
-            ? {
-                ...budget,
-                name: formData.name,
-                limit: Number(formData.limit),
-                emoji: selectedEmoji,
-              }
-            : budget
-        )
-      );
-    } else {
-      const newBudget = {
-        id: Date.now(),
-        name: formData.name,
-        limit: Number(formData.limit),
-        emoji: selectedEmoji,
-        spent: 0,
-      };
-      const response = await axios.post(
-        "http://localhost:8000/api/budget/create",
-        formData
-      );
-      successToaster("Budget created Successfully");
-      setBudgets([...budgets, newBudget]);
+    const budgetData = {
+      name: formData.name,
+      limit: Number(formData.limit),
+      emoji: selectedEmoji,
+    };
+
+    try {
+      if (editingBudget) {
+        console.log("Edit budget", editingBudget);
+        await axios.put(
+          `http://localhost:8000/api/budget/update/${editingBudget._id}`,
+          budgetData
+        );
+        successToaster("Budget updated successfully");
+        setBudgets(
+          budgets.map((budget) =>
+            budget._id === editingBudget._id
+              ? { ...budget, ...budgetData }
+              : budget
+          )
+        );
+      } else {
+        const response = await axios.post(
+          "http://localhost:8000/api/budget/create",
+          budgetData
+        );
+        successToaster("Budget created successfully");
+        setBudgets([...budgets, response.data]);
+      }
+    } catch (error) {
+      failureToaster(error?.response?.data?.message || "Error saving budget");
     }
 
     handleCloseModal();
@@ -104,14 +112,16 @@ const Budget = () => {
   const handleDelete = async (budgetId) => {
     if (window.confirm("Are you sure you want to delete this budget?")) {
       try {
-        const response = await axios.delete(
-          "http://localhost:8000/api/budget/delete"
+        await axios.delete(
+          `http://localhost:8000/api/budget/delete/${budgetId}`
         );
         successToaster("Budget deleted successfully");
+        setBudgets(budgets.filter((budget) => budget._id !== budgetId));
       } catch (error) {
-        failureToaster(error?.response.error.message);
+        failureToaster(
+          error?.response?.data?.message || "Error deleting budget"
+        );
       }
-      setBudgets(budgets.filter((budget) => budget.id !== budgetId));
     }
   };
 
@@ -122,20 +132,6 @@ const Budget = () => {
   return (
     <div className="min-h-screen w-full bg-gray-50 p-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header section */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Budgets</h1>
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          >
-            <option>This Week</option>
-            <option>This Month</option>
-            <option>This Year</option>
-          </select>
-        </div>
-
         {/* Budget grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Create New Budget Card */}
@@ -175,7 +171,7 @@ const Budget = () => {
                     <Edit className="h-5 w-5 text-gray-500" />
                   </button>
                   <button
-                    onClick={() => handleDelete(budget.id)}
+                    onClick={() => handleDelete(budget._id)}
                     className="text-red-400 hover:text-red-600"
                   >
                     <LucideDelete className="h-5 w-5" />
@@ -213,7 +209,6 @@ const Budget = () => {
                   Set up your budget with a name, limit, and emoji
                 </p>
               </div>
-
               <div className="space-y-4">
                 {/* Emoji Selector with Scrollable Dropdown */}
                 <div className="relative">

@@ -5,7 +5,7 @@ const router = express.Router();
 const Budget = mongoose.model("Budget");
 
 // GET all budgets
-router.get("/", async (req, res) => {
+router.get("/all-budgets", async (req, res) => {
   try {
     const budgets = await Budget.find();
     res.json(budgets);
@@ -28,7 +28,7 @@ router.post("/create", async (req, res) => {
 });
 
 // PUT update a budget by ID
-router.put("/:id", async (req, res) => {
+router.put("/update/:id", async (req, res) => {
   const { name, limit, emoji } = req.body;
   try {
     const updatedBudget = await Budget.findByIdAndUpdate(
@@ -43,7 +43,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE a budget by ID
-router.delete("/:id", async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
   try {
     await Budget.findByIdAndDelete(req.params.id);
     res.json({ message: "Budget deleted" });

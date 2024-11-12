@@ -45,6 +45,7 @@ module.exports = (app) => {
   // Models/Schemas
   require("./models/User");
   require("./models/Budget");
+  require("./models/Transaction");
 
   // API Routes
   app.use(require("./routes"));
