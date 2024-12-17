@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Plus, X, Edit, Trash2, DollarSign } from "lucide-react";
-import { failureToaster, successToaster } from "../../../utils/swal";
-// import { message } from "antd"; // Optional: For user notifications
+import {
+  confirmationAlert,
+  failureToaster,
+  successToaster,
+} from "../../../utils/swal";
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -49,6 +52,7 @@ const Transactions = () => {
   };
 
   const handleOpenOffcanvas = (transaction = null) => {
+    setIsOffcanvasOpen(true);
     if (transaction) {
       setFormData({
         amount: transaction.amount,
@@ -79,9 +83,7 @@ const Transactions = () => {
     try {
       const response = await fetch(url, {
         method: editingTransaction ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: formData.name,
           amount: parseFloat(formData.amount),
@@ -110,22 +112,17 @@ const Transactions = () => {
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this transaction?")) {
-      try {
-        const response = await fetch(
-          `http://localhost:8000/api/transactions/delete/${id}`,
-          {
-            method: "DELETE",
-          }
-        );
-
-        if (!response.ok) throw new Error("Failed to delete transaction");
-        fetchTransactions();
-        successToaster("Transaction deleted successfully");
-      } catch (error) {
-        setError("Error deleting transaction");
-        failureToaster("Failed to delete transaction");
-      }
+    try {
+      const response = await fetch(
+        `http://localhost:8000/api/transactions/delete/${id}`,
+        { method: "DELETE" }
+      );
+      if (!response.ok) throw new Error("Failed to delete transaction");
+      fetchTransactions();
+      successToaster("Transaction deleted successfully");
+    } catch (error) {
+      setError("Error deleting transaction");
+      failureToaster("Failed to delete transaction");
     }
   };
 
@@ -135,7 +132,7 @@ const Transactions = () => {
   };
 
   const getBudgetEmoji = (budgetId) => {
-    const budget = budgets.find((b) => b._id === budgetId);
+    const budget = budgets?.find((b) => b._id === budgetId);
     return budget ? budget.emoji : "💰";
   };
 
@@ -168,13 +165,13 @@ const Transactions = () => {
           {transactions.map((transaction) => (
             <div
               key={transaction._id}
-              className="p-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors"
+              className="p-4 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors "
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+              <div className="flex items-center justify-between ">
+                <div className="flex items-center space-x-4 ">
                   <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
                     <span className="text-xl">
-                      {getBudgetEmoji(transaction.budget)}
+                      {getBudgetEmoji(transaction.budget._id)}
                     </span>
                   </div>
                   <div>
@@ -182,7 +179,7 @@ const Transactions = () => {
                       {transaction.name}
                     </h3>
                     <p className="text-sm text-gray-500">
-                      {getBudgetName(transaction.budget)} •{" "}
+                      {getBudgetName(transaction.budget._id)} •{" "}
                       {new Date(transaction.date).toLocaleDateString()}
                     </p>
                   </div>
@@ -206,7 +203,9 @@ const Transactions = () => {
                       <Edit className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleDelete(transaction._id)}
+                      onClick={() =>
+                        confirmationAlert(() => handleDelete(transaction._id))
+                      }
                       className="p-2 text-red-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -239,114 +238,101 @@ const Transactions = () => {
               <div className="h-full flex flex-col">
                 <div className="px-6 py-4 border-b border-gray-200">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-900">
+                    <h2 className="text-lg font-semibold text-gray-800">
                       {editingTransaction
                         ? "Edit Transaction"
                         : "Add Transaction"}
                     </h2>
                     <button
                       onClick={() => setIsOffcanvasOpen(false)}
-                      className="p-2 text-gray-400 hover:text-gray-600 rounded-lg"
+                      className="p-2 text-gray-400 hover:text-gray-600 rounded-full"
                     >
                       <X className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
-
-                <div className="flex-1 overflow-y-auto p-6">
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Transaction Name
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
-                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        placeholder="Enter transaction name"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Amount
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-                          $
-                        </span>
-                        <input
-                          type="number"
-                          value={formData.amount}
-                          onChange={(e) =>
-                            setFormData({ ...formData, amount: e.target.value })
-                          }
-                          className="w-full px-4 py-2 pl-8 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                          placeholder="0.00"
-                          step="0.01"
-                          required
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Budget Category
-                      </label>
-                      <select
-                        value={formData.budgetId}
-                        onChange={(e) =>
-                          setFormData({ ...formData, budgetId: e.target.value })
-                        }
-                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        required
-                      >
-                        <option value="">Select a budget</option>
-                        {budgets.map((budget) => (
-                          <option key={budget._id} value={budget._id}>
-                            {budget.emoji} {budget.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Date
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.date}
-                        onChange={(e) =>
-                          setFormData({ ...formData, date: e.target.value })
-                        }
-                        className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                        required
-                      />
-                    </div>
-                  </form>
-                </div>
-
-                <div className="px-6 py-4 border-t border-gray-200">
-                  <div className="flex space-x-4">
-                    <button
-                      onClick={() => setIsOffcanvasOpen(false)}
-                      className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleSubmit}
-                      className="flex-1 px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
-                    >
-                      {editingTransaction ? "Save Changes" : "Add Transaction"}
-                    </button>
+                <form
+                  onSubmit={handleSubmit}
+                  className="flex-1 p-6 overflow-y-auto space-y-4"
+                >
+                  {/* Transaction Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      required
+                    />
                   </div>
-                </div>
+                  {/* Amount */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Amount
+                    </label>
+                    <input
+                      type="number"
+                      name="amount"
+                      className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                      value={formData.amount}
+                      onChange={(e) =>
+                        setFormData({ ...formData, amount: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  {/* Budget */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Budget
+                    </label>
+                    <select
+                      name="budgetId"
+                      className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                      value={formData.budgetId}
+                      onChange={(e) =>
+                        setFormData({ ...formData, budgetId: e.target.value })
+                      }
+                      required
+                    >
+                      <option value="">Select Budget</option>
+                      {budgets.map((budget) => (
+                        <option key={budget._id} value={budget._id}>
+                          {budget.emoji} {budget.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {/* Date */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      name="date"
+                      className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                      value={formData.date}
+                      onChange={(e) =>
+                        setFormData({ ...formData, date: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors text-center"
+                  >
+                    {editingTransaction ? "Save Changes" : "Add Transaction"}
+                  </button>
+                </form>
               </div>
             </div>
           </div>

@@ -16,8 +16,8 @@ const Sidebar = ({ isSidebarOpen }) => {
     { icon: <Home />, label: "Dashboard", path: "/dashboard" },
     { icon: <TrendingUp />, label: "budget", path: "/budget" },
     { icon: <Wallet />, label: "Transactions", path: "/transactions" },
-    { icon: <PieChart />, label: "Budgets", path: "/budgets" },
-    { icon: <Calendar />, label: "Calendar", path: "/calendar" },
+    { icon: <PieChart />, label: "Income", path: "/income" },
+    { icon: <Calendar />, label: "Retirement Planner", path: "/retirement" },
   ];
 
   const bottomNavItems = [

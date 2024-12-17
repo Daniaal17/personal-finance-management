@@ -146,9 +146,9 @@ const Budget = () => {
           </div>
 
           {/* Budget Cards */}
-          {budgets.map((budget) => (
+          {budgets.map((budget, index) => (
             <div
-              key={budget.id}
+              key={index}
               className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-all"
             >
               <div className="flex justify-between items-start mb-4">

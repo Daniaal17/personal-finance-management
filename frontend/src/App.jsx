@@ -12,6 +12,8 @@ import UserLayout from "./components/UserLayout";
 import Transactions from "./pages/Dashboard/Transactions";
 import Settings from "./pages/Dashboard/Settings";
 import Budget from "./pages/Dashboard/Budget";
+import Income from "./pages/Dashboard/Income";
+import RetirementPlanner from "./pages/Dashboard/RetirementPlan";
 
 function App() {
   const [count, setCount] = useState(0);
@@ -23,6 +25,8 @@ function App() {
           <Route path="" element={<UserLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="transactions" element={<Transactions />} />
+            <Route path="income" element={<Income />} />
+            <Route path="retirement" element={<RetirementPlanner />} />
 
             <Route path="budget" element={<Budget />} />
 
