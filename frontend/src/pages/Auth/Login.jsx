@@ -70,7 +70,12 @@ const Login = () => {
         data
       );
       successToaster("Login Successfully");
+      console.log("USer", response)
+      localStorage.setItem("user", JSON.stringify(response.data.data));
+      localStorage.setItem("token", response.data.data?.token)
+
       navigate("/dashboard");
+      
     } catch (error) {
       failureToaster(error.response.data.message);
     }

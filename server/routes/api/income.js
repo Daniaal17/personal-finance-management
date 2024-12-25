@@ -1,13 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const { default: mongoose } = require("mongoose");
+const { auth } = require("../../middlewares");
 
 const Income = require("../../models/Income");
 
 // GET all incomes
-router.get("/all-incomes", async (req, res) => {
+router.get("/all-incomes", auth.required, auth.user, async (req, res) => {
+  const userId =req.user._id
   try {
-    const incomes = await Income.find().sort({ date: -1 });
+    const incomes = await Income.find({user: userId}).sort({ date: -1 });
     res.json(incomes);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -15,7 +16,8 @@ router.get("/all-incomes", async (req, res) => {
 });
 
 // POST create new income
-router.post("/create", async (req, res) => {
+router.post("/create", auth.required, auth.user, async (req, res) => {
+  const userId =req.user._id
   const { source, amount, date, allocatedToRetirement } = req.body;
 
   // Validate retirement allocation
@@ -30,6 +32,7 @@ router.post("/create", async (req, res) => {
     amount,
     date,
     allocatedToRetirement: allocatedToRetirement || 0,
+    user: userId
   });
 
   try {
@@ -55,6 +58,7 @@ router.get("/income/:id", async (req, res) => {
 
 // PUT update income
 router.put("/update/:id", async (req, res) => {
+
   const { source, amount, date, allocatedToRetirement } = req.body;
 
   // Validate retirement allocation
@@ -87,7 +91,7 @@ router.put("/update/:id", async (req, res) => {
 });
 
 // DELETE income
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", auth.required, async (req, res) => {
   try {
     const deletedIncome = await Income.findByIdAndDelete(req.params.id);
 
@@ -102,7 +106,7 @@ router.delete("/delete/:id", async (req, res) => {
 });
 
 // GET total income and retirement statistics
-router.get("/statistics", async (req, res) => {
+router.get("/statistics", auth.required, async (req, res) => {
   try {
     const result = await Income.aggregate([
       {

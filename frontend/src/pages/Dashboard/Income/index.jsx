@@ -5,6 +5,7 @@ import {
   failureToaster,
   successToaster,
 } from "../../../utils/swal";
+import axios from "axios";
 
 const Income = () => {
   const [incomes, setIncomes] = useState([]);
@@ -18,23 +19,95 @@ const Income = () => {
     date: new Date().toISOString().split("T")[0],
   });
 
+  const preferredCurrency = JSON.parse(localStorage.getItem("user"))?.currency;
+
+
   useEffect(() => {
     fetchIncomes();
   }, []);
 
   const fetchIncomes = async () => {
     try {
-      const response = await fetch(
-        "http://localhost:8000/api/income/all-incomes"
-      );
-      if (!response.ok) throw new Error("Failed to fetch incomes");
-      const data = await response.json();
-      setIncomes(data);
+      const response = await axios.get("http://localhost:8000/api/income/all-incomes", {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`, // Token for authentication
+        },
+      });
+  
+      setIncomes(response.data);
     } catch (error) {
       setError("Error fetching incomes");
+      failureToaster("Failed to fetch incomes");
     }
   };
-
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+  
+    const validationError = validateRetirementAllocation(
+      formData.amount,
+      formData.allocatedToRetirement
+    );
+    if (validationError) {
+      setError(validationError);
+      failureToaster(validationError);
+      return;
+    }
+  
+    const url = editingIncome
+      ? `http://localhost:8000/api/income/update/${editingIncome._id}`
+      : "http://localhost:8000/api/income/create";
+  
+    try {
+      const response = await axios({
+        method: editingIncome ? "PUT" : "POST",
+        url,
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`, // Token for authentication
+        },
+        data: {
+          source: formData.source,
+          amount: parseFloat(formData.amount),
+          allocatedToRetirement: parseFloat(formData.allocatedToRetirement) || 0,
+          date: formData.date,
+        },
+      });
+  
+      setIsOffcanvasOpen(false);
+      setFormData({
+        source: "",
+        amount: "",
+        allocatedToRetirement: "",
+        date: "",
+      });
+      fetchIncomes();
+      successToaster(
+        editingIncome
+          ? "Income updated successfully"
+          : "Income added successfully"
+      );
+    } catch (error) {
+      setError(error.response?.data?.message || "Failed to save income");
+      failureToaster("Failed to save income");
+    }
+  };
+  
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:8000/api/income/delete/${id}`, {
+        headers: {
+          "Authorization": `Bearer ${localStorage.getItem("token")}`, // Token for authentication
+        },
+      });
+  
+      fetchIncomes();
+      successToaster("Income deleted successfully");
+    } catch (error) {
+      setError(error.response?.data?.message || "Error deleting income");
+      failureToaster("Failed to delete income");
+    }
+  };
+  
   const handleOpenOffcanvas = (income = null) => {
     if (income) {
       setFormData({
@@ -66,74 +139,7 @@ const Income = () => {
     return null;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const validationError = validateRetirementAllocation(
-      formData.amount,
-      formData.allocatedToRetirement
-    );
-    if (validationError) {
-      setError(validationError);
-      failureToaster(validationError);
-      return;
-    }
-
-    const url = editingIncome
-      ? `http://localhost:8000/api/income/update/${editingIncome._id}`
-      : "http://localhost:8000/api/income/create";
-
-    try {
-      const response = await fetch(url, {
-        method: editingIncome ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          source: formData.source,
-          amount: parseFloat(formData.amount),
-          allocatedToRetirement:
-            parseFloat(formData.allocatedToRetirement) || 0,
-          date: formData.date,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Error saving income");
-      }
-
-      setIsOffcanvasOpen(false);
-      setFormData({
-        source: "",
-        amount: "",
-        allocatedToRetirement: "",
-        date: "",
-      });
-      fetchIncomes();
-      successToaster(
-        editingIncome
-          ? "Income updated successfully"
-          : "Income added successfully"
-      );
-    } catch (error) {
-      setError(error.message);
-      failureToaster("Failed to save income");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      const response = await fetch(
-        `http://localhost:8000/api/income/delete/${id}`,
-        { method: "DELETE" }
-      );
-      if (!response.ok) throw new Error("Failed to delete income");
-      fetchIncomes();
-      successToaster("Income deleted successfully");
-    } catch (error) {
-      setError("Error deleting income");
-      failureToaster("Failed to delete income");
-    }
-  };
+  
 
   return (
     <div className="min-h-screen w-full bg-gray-50 p-6">
@@ -185,19 +191,19 @@ const Income = () => {
                 <div className="flex items-center space-x-6">
                   <div className="text-right">
                     <div className="font-semibold text-green-500">
-                      +${Number(income.amount).toFixed(2)}
+                      +{preferredCurrency?.symbol}{Number(income.amount).toFixed(2)}
                     </div>
                     <div className="text-sm text-gray-500">
-                      Retirement: $
+                      Retirement: {preferredCurrency?.symbol}
                       {Number(income.allocatedToRetirement).toFixed(2)}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center ">
                     <button
                       onClick={() => handleOpenOffcanvas(income)}
                       className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit  size={20}/>
                     </button>
                     <button
                       onClick={() =>
@@ -205,7 +211,7 @@ const Income = () => {
                       }
                       className="p-2 text-red-400 hover:text-red-600 rounded-lg hover:bg-gray-100"
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2  size={20}/>
                     </button>
                   </div>
                 </div>
@@ -318,7 +324,7 @@ const Income = () => {
                       placeholder={`Max: ${formData.amount || "0.00"}`}
                     />
                     <p className="mt-1 text-sm text-gray-500">
-                      Cannot exceed income amount of $
+                      Cannot exceed income amount of {preferredCurrency?.symbol}
                       {formData.amount || "0.00"}
                     </p>
                   </div>

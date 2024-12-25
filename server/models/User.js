@@ -19,6 +19,11 @@ const UserSchema = new mongoose.Schema(
       trim: true,
     },
 
+    profileImage: {
+      type: String,
+    
+    },
+
     email: {
       type: String,
       unique: true,
@@ -40,7 +45,15 @@ const UserSchema = new mongoose.Schema(
       enum: ["active", "inactive", "pending"],
       default: "pending",
     },
-    currency: { type: String, default: "GBP" },
+    currency: {
+      type: Object,
+      default: {
+        name: "USD", // Default currency name
+        symbol: "$", // Default currency symbol
+      },
+      required: true,
+    },
+    
     hash: { type: String, default: null },
     salt: { type: String, default: null },
   },
@@ -87,11 +100,14 @@ UserSchema.methods.generateJWT = function () {
 UserSchema.methods.toAuthJSON = function () {
   return {
     id: this._id,
+    email:this.email,
     fullName: this.fullName,
+    profileImage:this.profileImage,
     otp: this.otp,
     authType: this.authType,
     otp: this.otp,
     status: this.status,
+    currency: this.currency,
     token: this.generateJWT(),
   };
 };
@@ -100,6 +116,8 @@ UserSchema.methods.toJSON = function () {
   return {
     id: this._id,
     fullName: this.fullName,
+    profileImage:this.profileImage,
+
     email: this.email,
     status: this.status,
     currency: this.currency,

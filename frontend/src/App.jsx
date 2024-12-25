@@ -1,5 +1,5 @@
-import { Fragment, useState } from "react";
-import { Routes, Route, BrowserRouter } from "react-router-dom";
+import { Fragment } from "react";
+import { Routes, Route, BrowserRouter, Navigate } from "react-router-dom";
 
 import "./App.css";
 import Signup from "./pages/Auth/Signup";
@@ -14,24 +14,16 @@ import Settings from "./pages/Dashboard/Settings";
 import Budget from "./pages/Dashboard/Budget";
 import Income from "./pages/Dashboard/Income";
 import RetirementPlanner from "./pages/Dashboard/RetirementPlan";
+import AuthGuard from "./pages/AuthGaurd";
 
 function App() {
-  const [count, setCount] = useState(0);
+  const token = localStorage.getItem("token");
 
   return (
     <Fragment>
       <BrowserRouter>
         <Routes>
-          <Route path="" element={<UserLayout />}>
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="transactions" element={<Transactions />} />
-            <Route path="income" element={<Income />} />
-            <Route path="retirement" element={<RetirementPlanner />} />
-
-            <Route path="budget" element={<Budget />} />
-
-            <Route path="settings" element={<Settings />} />
-          </Route>
+          {/* Authentication Routes */}
           <Route path="/auth">
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<Signup />} />
@@ -40,11 +32,20 @@ function App() {
             <Route path="reset-password" element={<ResetPassword />} />
           </Route>
 
-          {/* <Route path="/products" element={<AdminLayout />}>
-            <Route index element={<Products />} /> 
-              <Route path="add" element={<AddProducts />} />
-            <Route path="chat" element={<Chat />} /> 
-            </Route> */}
+          {/* Protected Routes - Wrapped with PrivateRoute */}
+          <Route element={<AuthGuard />}>
+            <Route path="" element={<UserLayout />}>
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="income" element={<Income />} />
+              <Route path="retirement" element={<RetirementPlanner />} />
+              <Route path="budget" element={<Budget />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+          </Route>
+
+          {/* Fallback Route for Non-existent Routes */}
+          <Route path="*" element={<Navigate to={token ? "/dashboard" : "/auth/login"} replace />} />
         </Routes>
       </BrowserRouter>
     </Fragment>

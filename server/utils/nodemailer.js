@@ -4,6 +4,7 @@ const {
   passwordResetTemplate,
   contactTemplate,
   subscribeTemplate,
+  transactionReminder,
 } = require("../templates/authTemplates");
 const { smtpAuth } = require("../config");
 
@@ -26,11 +27,11 @@ const selectTemplate = (user, body, template) => {
     template = otpVerifyTemplate(user);
   } else if (body.resetPassword) {
     template = passwordResetTemplate(user);
-  } else if (body.contact) {
-    template = contactTemplate(user);
-  } else if (body.subscribe) {
-    template = subscribeTemplate(user);
-  } else {
+  } else if (body.reminder) {
+    template = transactionReminder(user, user.lastTransactionDate)
+  }
+  
+  else {
     console.log("Body Not Valid", body);
   }
 
@@ -45,6 +46,12 @@ const setMessage = (userEmail, subject, template) => ({
 });
 
 const sendEmail = (user, subject, body) => {
+
+  console.log("USer", user)
+  console.log("subject", subject)
+  console.log("body", body)
+
+
   const transporter = setTransporter();
 
   let template = "";

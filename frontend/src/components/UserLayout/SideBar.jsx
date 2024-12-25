@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import { NavLink } from "react-router-dom";
 import {
   DollarSign,
@@ -6,63 +6,59 @@ import {
   Wallet,
   TrendingUp,
   PieChart,
-  Calendar,
   Settings,
-  HelpCircle,
+  LogOut
 } from "lucide-react";
 
 const Sidebar = ({ isSidebarOpen }) => {
   const navItems = [
-    { icon: <Home />, label: "Dashboard", path: "/dashboard" },
-    { icon: <TrendingUp />, label: "budget", path: "/budget" },
-    { icon: <Wallet />, label: "Transactions", path: "/transactions" },
-    { icon: <PieChart />, label: "Income", path: "/income" },
-    { icon: <Calendar />, label: "Retirement Planner", path: "/retirement" },
+    { icon: <Home size={20} />, label: "Dashboard", path: "/dashboard" },
+    { icon: <Wallet size={20} />, label: "Budget", path: "/budget" },
+    { icon: <DollarSign size={20} />, label: "Transactions", path: "/transactions" },
+    { icon: <TrendingUp size={20} />, label: "Income", path: "/income" },
+    { icon: <PieChart size={20} />, label: "Retirement Planner", path: "/retirement" },
   ];
 
   const bottomNavItems = [
-    { icon: <Settings />, label: "Settings", path: "/settings" },
-    { icon: <HelpCircle />, label: "Help", path: "/help" },
+    { icon: <Settings size={20} />, label: "Settings", path: "/settings" },
+    { icon: <LogOut size={20} />, label: "Logout", path: "/auth/login" },
   ];
 
   const NavItem = ({ icon, label, path }) => (
     <NavLink
       to={path}
       className={({ isActive }) => `
-        w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-purple-50 transition-all
+        w-full flex items-center space-x-3 p-2 rounded-xl hover:bg-purple-50 transition-all
         ${isActive ? "bg-purple-50 text-purple-600" : "text-gray-600"}
       `}
     >
       {icon}
-      {isSidebarOpen && <span>{label}</span>}
+      {isSidebarOpen && <span className="text-sm">{label}</span>}
     </NavLink>
   );
 
   return (
-    <div
-      className={`${
-        isSidebarOpen ? "w-64" : "w-20"
-      } bg-white/80 backdrop-blur-sm border-r border-gray-200 transition-all duration-300 flex flex-col`}
-    >
-      <div className="p-4 flex items-center space-x-3">
-        <DollarSign className="h-8 w-8 text-purple-600" />
-        {isSidebarOpen && (
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
-            FinanceTracker
-          </span>
-        )}
-      </div>
+    <div className="h-full flex flex-col bg-white border-r border-gray-200">
+      <div className="flex flex-col h-full px-3 py-4">
+        <div className="mb-4">
+          {isSidebarOpen && (
+            <h1 className="text-lg font-bold text-purple-600">
+              FinanceTracker
+            </h1>
+          )}
+        </div>
 
-      <nav className="flex-1 p-4">
-        {navItems.map((item, index) => (
-          <NavItem key={index} {...item} />
-        ))}
-      </nav>
+        <div className="flex-1 space-y-1">
+          {navItems.map((item, index) => (
+            <NavItem key={index} {...item} />
+          ))}
+        </div>
 
-      <div className="p-4 border-t border-gray-200">
-        {bottomNavItems.map((item, index) => (
-          <NavItem key={index} {...item} />
-        ))}
+        <div className="space-y-1 pt-2 border-t">
+          {bottomNavItems.map((item, index) => (
+            <NavItem key={index} {...item} />
+          ))}
+        </div>
       </div>
     </div>
   );

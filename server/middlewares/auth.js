@@ -12,13 +12,14 @@ const getTokenFromHeader = (request) => {
 
 const required = async (request, response, next) => {
 	const token = getTokenFromHeader(request);
+
 	if (!token) {
 		return ResponseHandler.badRequest(response, "No authorization token found!");
 	}
 
 	try {
 		const payload = jwt.verify(token, config.secret);
-		request.body.payload = { id: payload.id, company: payload.company, role: payload.role };
+		request.body.payload = { id: payload.id };
 		return next();
 	} catch (err) {
 		return ResponseHandler.unauthorized(response, "Invalid token!");
@@ -26,41 +27,17 @@ const required = async (request, response, next) => {
 };
 
 const user = async (request, response, next) => {
+	console.log("req adsd", request.body.payload)
 	const { id } = request.body.payload;
-	const user = await User.findById(id).populate("company");
+	const user = await User.findById(id)
 	if (!user) return ResponseHandler.badRequest(response, "User not found!");
 	request.user = user;
 	return next();
 };
 
-const admin = async (request, response, next) => {
-	const { role } = request.body.payload;
-	if (role !== "admin") {
-		return ResponseHandler.unauthorized(response, "Unauthorized access!");
-	}
-	return next();
-};
 
-const superAdmin = async (request, response, next) => {
-	const { role } = request.body.payload;
-	if (role !== "super-admin") {
-		return ResponseHandler.unauthorized(response, "Unauthorized access!");
-	}
-	return next();
-};
-
-const systemAdmin = async (request, response, next) => {
-	const { role } = request.body.payload;
-	if (role !== "system-admin") {
-		return ResponseHandler.unauthorized(response, "Unauthorized access!");
-	}
-	return next();
-};
 
 module.exports = {
 	required,
 	user,
-	admin,
-	superAdmin,
-	systemAdmin,
 };

@@ -47,6 +47,8 @@ module.exports = (app) => {
   require("./models/Budget");
   require("./models/Transaction");
   require("./models/Income");
+  require("./models/Notification");
+
 
   // API Routes
   app.use(require("./routes"));

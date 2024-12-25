@@ -39,8 +39,10 @@ const Signup = () => {
         fieldErrors.email = "Email format is invalid.";
       }
     }
-    if (name === "currency" && !value.trim()) {
-      fieldErrors.currency = "Please select a preferred currency.";
+    if (name === "currency") {
+      if (!value || !value.name || !value.symbol) {
+        fieldErrors.currency = "Please select a preferred currency.";
+      }
     }
     if (name === "password") {
       if (!value.trim()) {
@@ -87,7 +89,7 @@ const Signup = () => {
     if (Object.keys(validationErrors).length !== 0) return;
 
     try {
-      const response = await axios.post(
+       await axios.post(
         "http://localhost:8000/api/auth/signup",
         data
       );
@@ -96,26 +98,37 @@ const Signup = () => {
         state: { type: "registration", email: data.email },
       });
 
-      console.log("Signup successful:", response.data);
+      
     } catch (error) {
       failureToaster(error.response.data.message);
       console.error("Error during signup:", error);
     }
   };
 
-  // Generic input handler
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setData({ ...data, [name]: value });
 
-    // Clear errors for corrected fields after they are valid
-    if (errors[name]) {
-      const fieldErrors = validateField(name, value);
-      if (!Object.keys(fieldErrors).length) {
-        setErrors({ ...errors, [name]: "" });
-      }
+// Generic input handler
+const handleInputChange = (e) => {
+  const { name, value } = e.target;
+
+  if (name === "currency") {
+    const selectedCurrency = currencies.find((currency) => currency.name === value);
+    setData({
+      ...data,
+      [name]: selectedCurrency || { name: "", symbol: "" }, // Store the full currency object
+    });
+  } else {
+    setData({ ...data, [name]: value });
+  }
+
+  // Clear errors for corrected fields after they are valid
+  if (errors[name]) {
+    const fieldErrors = validateField(name, value);
+    if (!Object.keys(fieldErrors).length) {
+      setErrors({ ...errors, [name]: "" });
     }
-  };
+  }
+};
+
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-purple-100 via-blue-100 to-teal-100 flex items-center justify-center p-6">
@@ -187,19 +200,20 @@ const Signup = () => {
                 Preferred Currency
               </label>
               <select
-                name="currency"
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                value={data.currency}
-                onChange={handleInputChange}
-                onBlur={handleBlur}
-              >
-                <option value="">Select currency</option>
-                {currencies.map((currency) => (
-                  <option key={currency.name} value={currency.name}>
-                    {currency.symbol} - {currency.label}
-                  </option>
-                ))}
-              </select>
+  name="currency"
+  className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
+  value={data.currency.name} // Access the 'name' property
+  onChange={handleInputChange}
+  onBlur={handleBlur}
+>
+  <option value="">Select currency</option>
+  {currencies.map((currency) => (
+    <option key={currency.name} value={currency.name}>
+      {currency.symbol} - {currency.label}
+    </option>
+  ))}
+</select>
+
               {submitted && errors.currency && (
                 <p className="text-red-500 text-xs mt-1">{errors.currency}</p>
               )}

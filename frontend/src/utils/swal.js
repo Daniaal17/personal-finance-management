@@ -159,10 +159,10 @@ export const failureToaster = (msg) => {
   });
 };
 
-export const confirmationAlert = (onConfirmation) => {
+export const confirmationAlert = (onConfirmation, text="You won't be able to revert this!") => {
   const alertConfig = {
     title: "Are you sure?",
-    text: "You won't be able to revert this!",
+    text: text,
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: CONFIRM_BUTTON_COLOR,

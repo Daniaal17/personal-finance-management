@@ -38,7 +38,7 @@ router.post("/signup", async (request, response) => {
       name: "string",
       email: "string",
       password: "string",
-      currency: "string",
+      currency: "object",
     });
     if (errors.length)
       return ResponseHandler.badRequest(response, errors.join(", "));
@@ -57,7 +57,7 @@ router.post("/signup", async (request, response) => {
     user.setOTP();
 
     await user.save();
-    // sendEmail(user, "Verify OTP", { verifyAccount: true });
+    sendEmail(user, "Verify OTP", { verifyAccount: true });
     return ResponseHandler.ok(
       response,
       "User signed up successfully! Please verify your OTP to login"
@@ -102,7 +102,7 @@ router.post("/login", async (request, response) => {
     if (!user.validPassword(password))
       return ResponseHandler.badRequest(response, "Invalid credentials");
 
-    return ResponseHandler.ok(response, { user: user.toAuthJSON() });
+    return ResponseHandler.ok(response,   user.toAuthJSON() );
   } catch (err) {
     console.log(err, "error");
     return ResponseHandler.badRequest(response, err);
