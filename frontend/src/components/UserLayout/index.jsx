@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Outlet } from "react-router-dom";
 import Header from "./Header";
 import Sidebar from "./SideBar";
+import { ProfileProvider } from "../../ProfileContext";
 
 const UserLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   return (
+    <ProfileProvider> 
     <div className="h-screen w-full bg-gray-50 flex overflow-hidden">
       <Sidebar isSidebarOpen={isSidebarOpen} />
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -19,6 +21,7 @@ const UserLayout = () => {
         </main>
       </div>
     </div>
+    </ProfileProvider>
   );
 };
 

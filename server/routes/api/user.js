@@ -6,7 +6,6 @@ const { auth } = require("../../middlewares");
 const {
   ResponseHandler,
   imageUploader,
-  schemaValidator,
 } = require("../../utils");
 const Transaction = require("../../models/Transaction");
 const Income = require("../../models/Income");
@@ -121,20 +120,28 @@ router.put(
 );
 
 
-// Add this to your routes file
+
+
 router.get("/dashboard-stats", auth.required, auth.user, async (req, res) => {
   const userId = req.user._id;
   try {
     const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
 
-    // Monthly Transactions
-    const monthlyTransactions = await Transaction.aggregate([
-      { $match: { user: userId, date: { $gte: startOfMonth, $lte: endOfMonth } } },
-      { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } }, totalAmount: { $sum: "$amount" } } },
-      { $sort: { _id: 1 } }
+    // Last 6 Transactions for Weekly View
+    const lastSixTransactions = await Transaction.aggregate([
+      { $match: { user: userId } },
+      { $sort: { date: -1 } },
+      { $limit: 6 },
+      {
+        $project: {
+          _id: 0,
+          date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+          totalAmount: "$amount",
+        },
+      },
     ]);
+
+    const dailySpending = lastSixTransactions.reverse();
 
     // Category-wise Expenses
     const expensesByCategory = await Transaction.aggregate([
@@ -174,13 +181,75 @@ router.get("/dashboard-stats", auth.required, auth.user, async (req, res) => {
     }));
 
     res.json({
-      dailySpending: monthlyTransactions,
+      dailySpending,
       expensesByCategory,
       monthlyComparison,
+      futureExpenses:[]
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
+
+
+
+router.get("/forecast-expenses", auth.required, auth.user, async (req, res) => {
+  const userId = req.user._id;
+
+  try {
+    // Get transactions from the past year
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+
+    // Fetch past transaction data for the user
+    const transactions = await Transaction.aggregate([
+      { $match: { user: userId, date: { $gte: oneYearAgo } } },
+      { $group: { _id: { $dateToString: { format: "%Y-%m", date: "$date" } }, totalAmount: { $sum: "$amount" } } },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Ensure we have at least two months of data to calculate the forecast
+    if (transactions.length < 2) {
+      return res.status(400).json({
+        message: "Not enough data to calculate forecast. At least two months of data is required.",
+      });
+    }
+
+    // Extract the expenses for the first two months
+    const firstMonthExpense = transactions[0].totalAmount;
+    const secondMonthExpense = transactions[1].totalAmount;
+
+    // Calculate the difference between the first two months
+    const monthToMonthDifference = secondMonthExpense - firstMonthExpense;
+
+    // Forecast for the next 6 months using the base price and difference
+    const forecast = [];
+    const now = new Date();
+    for (let i = 0; i < 6; i++) {
+      const forecastedExpense = firstMonthExpense + (monthToMonthDifference * (i + 1));
+
+      // Add the forecasted expense to the result (avoid negative amounts)
+      forecast.push({
+        month: new Date(now.getFullYear(), now.getMonth() + i + 1, 1).toISOString().split("T")[0].slice(0, 7),
+        predictedAmount: forecastedExpense > 0 ? forecastedExpense : 0, // Prevent negative forecast
+      });
+    }
+
+    res.json({
+      forecast,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to generate forecast", error: error.message });
+  }
+});
+
+
+
+
+
+
+
 
 module.exports = router;

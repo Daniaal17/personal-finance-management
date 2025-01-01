@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { User, Upload, Save } from "lucide-react";
 import currencies from './../../../constants/currencyList';
 import axios from "axios";
 import { failureToaster, successToaster } from "../../../utils/swal";
 import PasswordUpdate from "./PasswordUpdate";
+import { ProfileContext } from "../../../ProfileContext";
 
 const Settings = () => {
+  const { profile, setProfile } = useContext(ProfileContext); // for using data globally
+ 
+
   const [profileData, setProfileData] = useState({
     fullName: "",
     email: "",
@@ -13,6 +17,9 @@ const Settings = () => {
     profileImage: null,
     avatarPreview: null
   });
+
+
+
 
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("user") || "{}");
@@ -50,7 +57,7 @@ const Settings = () => {
     }
   };
 
-  const handleProfileSubmit = async (e) => {
+  const handleProfileUpdate = async (e) => {
     e.preventDefault();
     setProfileUpdateStatus("loading");
     const token = localStorage.getItem("token");
@@ -69,32 +76,32 @@ const Settings = () => {
         url: "http://localhost:8000/api/user/update",
         headers: {
           Authorization: `Bearer ${token}`,
-          // Remove Content-Type header to let browser set it with boundary for FormData
+         
         },
         data: formData
       });
-
-      console.log("Form data", formData)
 
       // Clean up old avatar preview URL if it exists
       if (profileData.avatarPreview && profileData.avatarPreview.startsWith('blob:')) {
         URL.revokeObjectURL(profileData.avatarPreview);
       }
-
       const updatedUserData = response.data.data;
       localStorage.setItem("user", JSON.stringify(updatedUserData));
+
       
       setProfileData(prevState => ({
         ...prevState,
         avatarPreview: updatedUserData.profileImage || null
       }));
 
+      setProfile(prevState => ({
+        ...prevState,
+        profileImage: updatedUserData.profileImage || null,
+        fullName: updatedUserData.fullName
+      })); // global state for header
+
       successToaster("Profile updated successfully");
       setProfileUpdateStatus("success");
-
-      setTimeout(() => {
-        setProfileUpdateStatus(null);
-      }, 3000);
       
     } catch (error) {
       failureToaster(error.response?.data?.message || "Error updating profile");
@@ -114,7 +121,7 @@ const Settings = () => {
             Profile Settings
           </h2>
 
-          <form onSubmit={handleProfileSubmit}>
+          <form onSubmit={handleProfileUpdate}>
             {/* Avatar Upload */}
             <div className="mb-6 flex items-center gap-6">
               <div className="relative">

@@ -2,8 +2,6 @@ const nodemailer = require("nodemailer");
 const {
   otpVerifyTemplate,
   passwordResetTemplate,
-  contactTemplate,
-  subscribeTemplate,
   transactionReminder,
 } = require("../templates/authTemplates");
 const { smtpAuth } = require("../config");

@@ -27,7 +27,6 @@ const required = async (request, response, next) => {
 };
 
 const user = async (request, response, next) => {
-	console.log("req adsd", request.body.payload)
 	const { id } = request.body.payload;
 	const user = await User.findById(id)
 	if (!user) return ResponseHandler.badRequest(response, "User not found!");

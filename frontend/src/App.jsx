@@ -24,7 +24,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           {/* Authentication Routes */}
-         
+
           <Route path="/auth">
             <Route path="login" element={<Login />} />
             <Route path="signup" element={<Signup />} />
@@ -32,7 +32,6 @@ function App() {
             <Route path="forgot-password" element={<ForgotPassword />} />
             <Route path="reset-password" element={<ResetPassword />} />
           </Route>
-         
 
           {/* Protected Routes - Wrapped with PrivateRoute */}
           <Route element={<AuthGuard />}>
@@ -45,12 +44,25 @@ function App() {
               <Route path="settings" element={<Settings />} />
             </Route>
           </Route>
-                    {/* Redirect if user does not have token */}
-                    <Route path="/" element={token ? <Navigate to="/dashboard" /> : <Navigate to="/auth/login" />} />
-
+          {/* Redirect if user does not have token */}
+          <Route
+            path="/"
+            element={
+              token ? (
+                <Navigate to="/dashboard" />
+              ) : (
+                <Navigate to="/auth/login" />
+              )
+            }
+          />
 
           {/* Fallback Route for Non-existent Routes */}
-          <Route path="*" element={<Navigate to={token ? "/dashboard" : "/auth/login"} replace />} />
+          <Route
+            path="*"
+            element={
+              <Navigate to={token ? "/dashboard" : "/auth/login"} replace />
+            }
+          />
         </Routes>
       </BrowserRouter>
     </Fragment>

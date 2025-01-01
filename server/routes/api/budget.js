@@ -42,7 +42,13 @@ router.post("/create", auth.required, auth.user, async (req, res) => {
   const userId= req.user._id
 
   const { name, limit, emoji, spent } = req.body;
-  const newBudget = new Budget({ name, limit, emoji, spent: spent || 0, user: userId});
+  const newBudget = new Budget({
+     name,
+      limit,
+       emoji, 
+       spent: spent || 0,
+        user: userId
+      });
 
   try {
     const savedBudget = await newBudget.save();

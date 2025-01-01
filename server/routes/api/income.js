@@ -43,18 +43,7 @@ router.post("/create", auth.required, auth.user, async (req, res) => {
   }
 });
 
-// GET single income by ID
-router.get("/income/:id", async (req, res) => {
-  try {
-    const income = await Income.findById(req.params.id);
-    if (!income) {
-      return res.status(404).json({ message: "Income not found" });
-    }
-    res.json(income);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+
 
 // PUT update income
 router.put("/update/:id", async (req, res) => {
