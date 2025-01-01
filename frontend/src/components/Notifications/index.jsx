@@ -7,8 +7,8 @@ import { failureToaster, successToaster } from '../../utils/swal';
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null); // Create a reference to the dropdown
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
 
 
   const unreadCount = notifications.filter((n) => !n?.isRead).length;
@@ -74,6 +74,12 @@ const Notifications = () => {
 
   // Socket setup for real-time updates
   useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+
     let socket;
     
     const initializeSocket = () => {
@@ -93,33 +99,18 @@ const Notifications = () => {
       }
     };
 
+    document.addEventListener('mousedown', handleClickOutside);
+
     getAllNotifications();
     initializeSocket();
 
     // Cleanup on unmount
     return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
       if (socket) socket.disconnect();
     };
   }, []);
 
-
-    // Close dropdown if clicked outside
-    useEffect(() => {
-      const handleClickOutside = (event) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-          setShowDropdown(false);
-        }
-      };
-  
-      document.addEventListener("mousedown", handleClickOutside);
-      
-      return () => {
-        document.removeEventListener("mousedown", handleClickOutside);
-      };
-    }, []);
-
-
-    console.log("Togle", showDropdown)
 
   function timeAgo(date) {
     const now = new Date();
@@ -149,9 +140,9 @@ const Notifications = () => {
   
 
   return (
-    <div className="relative">
+    <div className="relative" ref={containerRef} style={{zIndex: 22222}}>
       <button
-           onClick={() => setShowDropdown(prev => !prev)} 
+        onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 rounded-xl hover:bg-gray-100"
       >
         <Bell className="h-8 w-8 text-gray-600" />
@@ -162,8 +153,8 @@ const Notifications = () => {
         )}
       </button>
 
-      {showDropdown && (
-        <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden  "  ref={dropdownRef} >
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden  "  >
           <div className="flex justify-between items-center p-4 border-b border-gray-100">
             <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
             <div className="flex items-center space-x-2">

@@ -228,7 +228,7 @@ router.get("/forecast-expenses", auth.required, auth.user, async (req, res) => {
     for (let i = 0; i < 6; i++) {
       const forecastedExpense = firstMonthExpense + (monthToMonthDifference * (i + 1));
 
-      // Add the forecasted expense to the result (avoid negative amounts)
+      // Add the fore casted expense to the result (avoid negative amounts)
       forecast.push({
         month: new Date(now.getFullYear(), now.getMonth() + i + 1, 1).toISOString().split("T")[0].slice(0, 7),
         predictedAmount: forecastedExpense > 0 ? forecastedExpense : 0, // Prevent negative forecast
