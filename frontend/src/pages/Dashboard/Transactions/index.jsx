@@ -150,6 +150,8 @@ const Transactions = () => {
     setFilters(newFilters);
   };
 
+  console.log("formData", formData)
+
   return (
     <div className="min-h-screen w-full p-6">
       <div className="max-w-6xl mx-auto">
@@ -245,7 +247,8 @@ const Transactions = () => {
                     <select
                       name="budgetId"
                       className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-purple-500 focus:border-purple-500"
-                      value={formData.budgetId}
+                      value={formData?.budgetId?._id}
+                      disabled={editingTransaction}
                       onChange={(e) =>
                         setFormData({ ...formData, budgetId: e.target.value })
                       }
