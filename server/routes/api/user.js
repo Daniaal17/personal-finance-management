@@ -204,38 +204,46 @@ router.get("/forecast-expenses", auth.required, auth.user, async (req, res) => {
     const transactions = await Transaction.aggregate([
       { $match: { user: userId, date: { $gte: oneYearAgo } } },
       { $group: { _id: { $dateToString: { format: "%Y-%m", date: "$date" } }, totalAmount: { $sum: "$amount" } } },
-      { $sort: { _id: 1 } }
+      { $sort: { _id: 1 } },
     ]);
 
-    // Ensure we have at least two months of data to calculate the forecast
+    // Ensure there is at least one month of data
     if (transactions.length < 2) {
       return res.status(400).json({
         message: "Not enough data to calculate forecast. At least two months of data is required.",
       });
     }
 
-    const firstMonthExpense = transactions[0].totalAmount;
-    const secondMonthExpense = transactions[1].totalAmount;
+    // Calculate month-to-month differences
+    const monthlyDifferences = [];
+    for (let i = 1; i < transactions.length; i++) {
+      const diff = transactions[i].totalAmount - transactions[i - 1].totalAmount;
+      monthlyDifferences.push(diff);
+    }
 
-    const monthToMonthDifference = secondMonthExpense - firstMonthExpense;
+    // Calculate the average month-to-month difference
+    const averageDifference =
+      monthlyDifferences.reduce((sum, diff) => sum + diff, 0) / monthlyDifferences.length;
 
-    // Forecast for the next 6 months using the base price and difference
+    // Forecast for the next 6 months
     const forecast = [];
     const now = new Date();
+    let lastMonthExpense = transactions[transactions.length - 1].totalAmount; // Start with the last month's expense
     for (let i = 0; i < 6; i++) {
-      const forecastedExpense = firstMonthExpense + (monthToMonthDifference * (i + 1));
-
-      // Add the fore casted expense to the result (avoid negative amounts)
+      const forecastedExpense = lastMonthExpense + averageDifference;
       forecast.push({
-        month: new Date(now.getFullYear(), now.getMonth() + i + 1, 1).toISOString().split("T")[0].slice(0, 7),
+        month: new Date(now.getFullYear(), now.getMonth() + i + 1, 1)
+          .toISOString()
+          .split("T")[0]
+          .slice(0, 7),
         predictedAmount: forecastedExpense > 0 ? forecastedExpense : 0, // Prevent negative forecast
       });
+      lastMonthExpense = forecastedExpense; // Update for the next month's calculation
     }
 
     res.json({
       forecast,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Failed to generate forecast", error: error.message });
