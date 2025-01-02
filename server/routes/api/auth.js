@@ -189,7 +189,7 @@ router.post("/set-new-password", async (request, response) => {
     if (!otp) {
       return ResponseHandler.badRequest(
         response,
-        "Otp not found please reset password sagain"
+        "Otp not found please reset password again"
       );
     }
     if (!password || !email?.trim())

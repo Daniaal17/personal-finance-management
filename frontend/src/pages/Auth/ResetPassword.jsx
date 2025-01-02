@@ -43,7 +43,7 @@ export const ResetPassword = () => {
     const validationErrors = validatePasswords();
     setErrors(validationErrors);
 
-    if (!Object.keys(validationErrors).length === 0) return;
+    if (Object.keys(validationErrors).length !== 0) return;
     const payload = {
       otp: otp,
       password: passwords.newPassword,
