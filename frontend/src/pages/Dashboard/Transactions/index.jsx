@@ -150,8 +150,6 @@ const Transactions = () => {
     setFilters(newFilters);
   };
 
-  console.log("formData", formData)
-
   return (
     <div className="min-h-screen w-full p-6">
       <div className="max-w-6xl mx-auto">

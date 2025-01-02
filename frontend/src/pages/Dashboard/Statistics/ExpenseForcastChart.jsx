@@ -11,6 +11,14 @@ const ExpenseForecastChart = ({ currencyFormatter }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const emptyData = Array.from({ length: 6 }, (_, i) => ({
+    month: new Date(new Date().getFullYear(), new Date().getMonth() + i + 1, 1)
+      .toISOString()
+      .split("T")[0]
+      .slice(0, 7),
+    predictedAmount: 0,
+  }));
+
   useEffect(() => {
     const fetchForecastData = async () => {
       const token = localStorage.getItem("token");
@@ -22,7 +30,8 @@ const ExpenseForecastChart = ({ currencyFormatter }) => {
         });
         setFutureExpenses(response.data.forecast || []);
       } catch (err) {
-        setError(err.message);
+        setError(err.response?.data?.message || "Error fetching data.");
+        setFutureExpenses([])
       } finally {
         setIsLoading(false);
       }
@@ -30,6 +39,10 @@ const ExpenseForecastChart = ({ currencyFormatter }) => {
 
     fetchForecastData();
   }, []);
+
+
+
+
 
   return (
     <div className="bg-white rounded-xl shadow-sm p-6">
@@ -40,11 +53,11 @@ const ExpenseForecastChart = ({ currencyFormatter }) => {
         {isLoading ? (
           <p>Loading...</p>
         ) : error ? (
-          <p className="text-red-500">{error}</p>
+          <p className="text-yellow-500">{error}</p>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={futureExpenses}
+              data={futureExpenses?.length ? futureExpenses : emptyData}
               margin={{
                 top: 20,
                 right: 30,
@@ -89,7 +102,7 @@ const ExpenseForecastChart = ({ currencyFormatter }) => {
             </LineChart>
           </ResponsiveContainer>
         )}
-        {!futureExpenses?.length && !isLoading && <NoDataOverlay />}
+        {!futureExpenses?.length && !isLoading && <NoDataOverlay/>}
       </div>
     </div>
   );

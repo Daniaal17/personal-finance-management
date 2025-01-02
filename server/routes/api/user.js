@@ -125,7 +125,6 @@ router.put(
 router.get("/dashboard-stats", auth.required, auth.user, async (req, res) => {
   const userId = req.user._id;
   try {
-    const now = new Date();
 
     // Last 6 Transactions for Weekly View
     const lastSixTransactions = await Transaction.aggregate([
@@ -215,11 +214,9 @@ router.get("/forecast-expenses", auth.required, auth.user, async (req, res) => {
       });
     }
 
-    // Extract the expenses for the first two months
     const firstMonthExpense = transactions[0].totalAmount;
     const secondMonthExpense = transactions[1].totalAmount;
 
-    // Calculate the difference between the first two months
     const monthToMonthDifference = secondMonthExpense - firstMonthExpense;
 
     // Forecast for the next 6 months using the base price and difference
